@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>歯の防衛軍 - 滅菌大作戦（ランダム復刻版）</title>
   <style>
-    body { background: #222; color: white; text-align: center; overflow: hidden; margin: 0; font-family: sans-serif; }
+    body { background: #222; color: white; text-align: center; margin: 0; font-family: sans-serif; }
 
     #game-container {
       position: relative; width: 100vw; height: 100vh;
@@ -44,11 +44,11 @@
       z-index: 3;
     }
 
-    /* チャージ（スマホでも切れない＆テキストはバーの上） */
+    /* ここが重要：スマホで切れないよう fixed にする */
     #charge-container {
-      position: absolute;
+      position: fixed;
       left: 50%;
-      bottom: 22px;
+      bottom: 18px;
       transform: translateX(-50%);
       width: 320px;
       z-index: 9999;
@@ -130,7 +130,7 @@
 
     <div id="charge-container">
       <div id="charge-frame"><div id="charge-fill"></div></div>
-      <div id="beam-charge-text">必殺技：右クリック（PC） / 長押し（スマホ）</div>
+      <div id="beam-charge-text">必殺技：</div>
     </div>
 
     <div id="mobile-tip">スマホは「長押し」でビーム</div>
@@ -164,11 +164,8 @@
       const mobileTip = document.getElementById('mobile-tip');
       const beamChargeText = document.getElementById('beam-charge-text');
 
-      // スマホ/PCで表記を切り替え
       if (beamChargeText) {
-        beamChargeText.textContent = isMobile
-          ? '必殺技：長押し'
-          : '必殺技：右クリック';
+        beamChargeText.textContent = isMobile ? '必殺技：長押し' : '必殺技：右クリック';
       }
 
       let playerX = window.innerWidth / 2;
@@ -226,7 +223,7 @@
           if (bossActive) {
             const bElement = document.querySelector('.boss');
             if (bElement) {
-              const bossCenterX = parseInt(bElement.style.left) + 165; // 330/2
+              const bossCenterX = parseInt(bElement.style.left) + 165;
               if (Math.abs(bossCenterX - playerX) < 70) damageBoss(5);
             }
           }
@@ -260,7 +257,6 @@
         longPressTimer = null;
       });
 
-      // PC：スペースでもOK（念のため）
       window.addEventListener('keydown', (e) => {
         if (e.code === 'Space' || e.keyCode === 32) {
           e.preventDefault();
@@ -317,11 +313,8 @@
           if (ty < 120) ty += 2;
 
           tx += 3 * dir;
-
-          // ←ここがポイント：
-          // ボス330px大きめで「画面外に消えてもOK」なので、跳ね返し範囲をゆるめる
-          // 表示領域を少し外に許可
-          if (tx > window.innerWidth - 330 - 120 || tx < -120) dir *= -1;
+          // 見切れOKでも、反転が細かく起きないように余白を増やす
+          if (tx > window.innerWidth - 330 - 220 || tx < -220) dir *= -1;
 
           boss.style.top = ty + 'px';
           boss.style.left = tx + 'px';
@@ -350,7 +343,6 @@
         }
       }
 
-      // 敵生成（通常💧でもボスにダメージ）
       setInterval(() => {
         if (bossActive) return;
 
@@ -369,7 +361,6 @@
           ePos += speed;
           enemy.style.top = ePos + 'px';
 
-          // 敵を通常弾（💧）で撃破
           const bullets = document.getElementsByClassName('bullet');
           for (let b of bullets) {
             if (enemy.dataset.state !== 'alive') continue;
@@ -397,7 +388,7 @@
               score += 10;
               document.getElementById('score').innerText = "SCORE: " + score;
 
-              if (score > 0 && score % 500 === 0) spawnBoss(); // ボス早め
+              if (score > 0 && score % 500 === 0) spawnBoss();
               return;
             }
           }
