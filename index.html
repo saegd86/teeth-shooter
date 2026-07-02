@@ -6,11 +6,12 @@
   <title>歯の防衛軍 - 滅菌大作戦（ランダム復刻版）</title>
   <style>
     body { background: #222; color: white; text-align: center; overflow: hidden; margin: 0; font-family: sans-serif; }
+
     #game-container {
       position: relative; width: 100vw; height: 100vh;
       background: radial-gradient(circle, #ffc0cb, #ffb6c1);
-      margin: 0 auto; border-bottom: 8px solid #ff69b4; overflow: hidden;
-      touch-action: none; cursor: crosshair;
+      margin: 0 auto; border-bottom: 8px solid #ff69b4;
+      overflow: hidden; touch-action: none; cursor: crosshair;
     }
 
     #score {
@@ -32,6 +33,7 @@
     }
 
     .bullet { position: absolute; font-size: 25px; z-index: 4; pointer-events:none; user-select:none; }
+
     .beam {
       position: absolute;
       bottom: 100px;
@@ -42,67 +44,49 @@
       z-index: 3;
     }
 
-#charge-container {
-  position: absolute;
-  bottom: 6px;               /* 少し上に余裕 */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 320px;
-  height: 18px;             /* 2段にするので高さを増やす */
+    /* チャージ（スマホでも切れない＆テキストはバーの上） */
+    #charge-container {
+      position: absolute;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      width: 320px;
+      z-index: 9999;
 
-  background: transparent;
-  z-index: 100;
-  box-sizing: border-box;
-  overflow: visible;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
 
-  /* 2段 */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;                 /* テキストとバーの間 */
-}
+      pointer-events: none;
+    }
 
-#charge-bar {
-  width: 100%;
-  height: 6px;
-  background: #00ffff;     /* この背景自体は色の基準用（実際の塗りはJSでwidth指定） */
-  border-radius: 5px;
-  transition: 0.2s;
+    #charge-frame {
+      width: 100%;
+      height: 8px;
+      background: #555;
+      border-radius: 5px;
+      overflow: hidden;
+    }
 
-  /* JSの width=0..100% をちゃんと効かせるため、子要素的運用はしないので
-     ここでは「背景」を#00ffffのままにしないと見え方が変になる場合があります。
-     対策として、外枠の#charge-frameを使うので次のルールも追加します。 */
-}
+    #charge-fill {
+      height: 100%;
+      width: 0%;
+      background: #00ffff;
+      border-radius: 5px;
+      transition: 0.2s;
+    }
 
-/* 外枠（背景グレーの枠）を作るためのフレーム */
-#charge-frame {
-  width: 100%;
-  height: 10px;
-  background: #555;
-  border-radius: 5px;
-  overflow: hidden;
-}
+    #beam-charge-text {
+      font-size: 11.5px;
+      font-weight: 950;
+      color: rgba(40, 0, 45, 0.95);
+      white-space: nowrap;
+      user-select: none;
+      line-height: 1;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+    }
 
-/* 実際に伸びるバー */
-#charge-fill {
-  height: 100%;
-  width: 0%;
-  background: #00ffff;
-  border-radius: 5px;
-  transition: 0.2s;
-}
-
-#beam-charge-text {
-  font-size: 11.5px;
-  font-weight: 950;
-  color: rgba(40, 0, 45, 0.95);
-  white-space: nowrap;
-  user-select: none;
-  pointer-events: none;
-  line-height: 1;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.6);
-}
     #boss-hp-container {
       position: absolute; top: 70px; left: 50%;
       transform: translateX(-50%);
@@ -111,7 +95,6 @@
     }
     #boss-hp { width: 100%; height: 100%; background: #ff0000; }
 
-    /* ボス：大きめ */
     .boss { position: absolute; z-index: 6; }
     .boss img {
       width: 330px; height: 330px;
@@ -145,12 +128,10 @@
 
     <div id="boss-hp-container"><div id="boss-hp"></div></div>
 
-   <div id="charge-container">
-  <div id="charge-frame">
-    <div id="charge-fill"></div>
-  </div>
-  <div id="beam-charge-text">必殺技：右クリック / 長押し</div>
-</div>
+    <div id="charge-container">
+      <div id="charge-frame"><div id="charge-fill"></div></div>
+      <div id="beam-charge-text">必殺技：右クリック（PC） / 長押し（スマホ）</div>
+    </div>
 
     <div id="mobile-tip">スマホは「長押し」でビーム</div>
   </div>
@@ -167,6 +148,8 @@
       let bossActive = false;
       let bossHP = 100;
 
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
       const ASSET = {
         player: 'https://lh3.googleusercontent.com/pw/AP1GczPPUkdPu1gSfXNsbBdZBNXv1AlPzWVFMrjIdTXKRw-f5DgveIpwMY-ABgIo2js4Us1s3CPaBYax_-a9jenFxFJY025Rqvjqv2vtOS-wxE8s34onCfj_kpuONJlDvaDrf1h9H6q_sqphX6s3WTWOVrRD=w729-h911-s-no-gm',
         enemy:  'https://lh3.googleusercontent.com/pw/AP1GczNJt7YEwIRTslg-7I4gO3tg_fC2ivisB2oqH_ft5-RMeT7vhwvVSENYrQtRrVmlmFbz5DTEpLtSEgnmedrN9pvfOObIff_BHA4JnA5XUvxCWOJa30ex625XCSNfzDcaJMqEyQBGG0fWi2jv63v_r_JI=w350-h362-s-no-gm',
@@ -175,16 +158,24 @@
 
       const player = document.getElementById('player');
       const container = document.getElementById('game-container');
-      const chargeBar = document.getElementById('charge-fill');
+      const chargeFill = document.getElementById('charge-fill');
       const bossHPBar = document.getElementById('boss-hp');
       const bossHPContainer = document.getElementById('boss-hp-container');
       const mobileTip = document.getElementById('mobile-tip');
+      const beamChargeText = document.getElementById('beam-charge-text');
+
+      // スマホ/PCで表記を切り替え
+      if (beamChargeText) {
+        beamChargeText.textContent = isMobile
+          ? '必殺技：長押し'
+          : '必殺技：右クリック';
+      }
 
       let playerX = window.innerWidth / 2;
 
       player.innerHTML = `<img src="${ASSET.player}" alt="player">`;
 
-      if (/Mobi|Android/i.test(navigator.userAgent)) {
+      if (isMobile) {
         mobileTip.style.display = 'block';
         setTimeout(() => mobileTip.style.display = 'none', 2500);
       }
@@ -204,7 +195,7 @@
         if (charge < 100) return;
 
         charge = 0;
-        chargeBar.style.width = '0%';
+        if (chargeFill) chargeFill.style.width = '0%';
 
         const beam = document.createElement('div');
         beam.className = 'beam';
@@ -216,18 +207,7 @@
           h += 60;
           beam.style.height = h + 'px';
 
-          // ボス判定（ビーム時）
-          if (bossActive) {
-            const bElement = document.querySelector('.boss');
-            if (bElement) {
-              const bossCenterX = parseInt(bElement.style.left) + 165; // 330/2
-              if (Math.abs(bossCenterX - playerX) < 70) {
-                damageBoss(5);
-              }
-            }
-          }
-
-          // 敵判定（ビームで倒す）
+          // 敵（ビームで撃破）
           const enemies = document.getElementsByClassName('enemy');
           for (let e of enemies) {
             if (e.dataset.state !== 'alive') continue;
@@ -239,6 +219,15 @@
 
               e.innerHTML = '✨';
               setTimeout(() => e.remove(), 100);
+            }
+          }
+
+          // ボス（ビームでダメージ）
+          if (bossActive) {
+            const bElement = document.querySelector('.boss');
+            if (bElement) {
+              const bossCenterX = parseInt(bElement.style.left) + 165; // 330/2
+              if (Math.abs(bossCenterX - playerX) < 70) damageBoss(5);
             }
           }
 
@@ -271,7 +260,7 @@
         longPressTimer = null;
       });
 
-      // PC：スペースでもOK
+      // PC：スペースでもOK（念のため）
       window.addEventListener('keydown', (e) => {
         if (e.code === 'Space' || e.keyCode === 32) {
           e.preventDefault();
@@ -306,7 +295,7 @@
         });
 
         charge = Math.min(100, charge + 3);
-        chargeBar.style.width = charge + '%';
+        if (chargeFill) chargeFill.style.width = charge + '%';
       }, 220);
 
       function spawnBoss() {
@@ -321,7 +310,6 @@
         const centerX = window.innerWidth / 2;
         boss.style.left = (centerX - 165) + 'px';
         boss.style.top = '-180px';
-
         container.appendChild(boss);
 
         let ty = -180, tx = centerX - 165, dir = 1;
@@ -329,7 +317,11 @@
           if (ty < 120) ty += 2;
 
           tx += 3 * dir;
-          if (tx > window.innerWidth - 330 + 10 || tx < 10) dir *= -1;
+
+          // ←ここがポイント：
+          // ボス330px大きめで「画面外に消えてもOK」なので、跳ね返し範囲をゆるめる
+          // 表示領域を少し外に許可
+          if (tx > window.innerWidth - 330 - 120 || tx < -120) dir *= -1;
 
           boss.style.top = ty + 'px';
           boss.style.left = tx + 'px';
@@ -358,6 +350,7 @@
         }
       }
 
+      // 敵生成（通常💧でもボスにダメージ）
       setInterval(() => {
         if (bossActive) return;
 
@@ -376,9 +369,8 @@
           ePos += speed;
           enemy.style.top = ePos + 'px';
 
+          // 敵を通常弾（💧）で撃破
           const bullets = document.getElementsByClassName('bullet');
-
-          // 敵を通常弾で撃破（従来の当たり判定を維持）
           for (let b of bullets) {
             if (enemy.dataset.state !== 'alive') continue;
 
@@ -405,32 +397,8 @@
               score += 10;
               document.getElementById('score').innerText = "SCORE: " + score;
 
-              // ボスを早く（5000→500）
-              if (score > 0 && score % 500 === 0) spawnBoss();
+              if (score > 0 && score % 500 === 0) spawnBoss(); // ボス早め
               return;
-            }
-          }
-
-          // ボスがいる場合（このループに入るのは bossActive=false だが念のため）
-          if (bossActive) {
-            const bossEl = document.querySelector('.boss');
-            if (bossEl) {
-              const bossCenterX = parseInt(bossEl.style.left) + 165;
-              const bossCenterY = parseInt(bossEl.style.top) + 165;
-
-              for (let b of bullets) {
-                const bulletLeft = parseInt(b.style.left);
-                const bulletTop = container.offsetHeight - parseInt(b.style.bottom) - 25;
-
-                const dx = Math.abs(bulletLeft + 12 - bossCenterX);
-                const dy = Math.abs(bulletTop - bossCenterY);
-
-                if (dx < 45 && dy < 60) {
-                  b.remove();
-                  damageBoss(3);
-                  break;
-                }
-              }
             }
           }
 
@@ -440,6 +408,32 @@
           }
         }, 20);
       }, 700);
+
+      // ボスが出ている間：💧でボスにもダメージ
+      setInterval(() => {
+        if (!bossActive) return;
+
+        const bossEl = document.querySelector('.boss');
+        if (!bossEl) return;
+
+        const bossCenterX = parseInt(bossEl.style.left) + 165;
+        const bossCenterY = parseInt(bossEl.style.top) + 165;
+
+        const bullets = document.getElementsByClassName('bullet');
+        for (let b of bullets) {
+          const bulletLeft = parseInt(b.style.left);
+          const bulletTop = container.offsetHeight - parseInt(b.style.bottom) - 25;
+
+          const dx = Math.abs(bulletLeft + 12 - bossCenterX);
+          const dy = Math.abs(bulletTop - bossCenterY);
+
+          if (dx < 45 && dy < 60) {
+            b.remove();
+            damageBoss(3);
+            break;
+          }
+        }
+      }, 80);
     }
 
     startGame();
