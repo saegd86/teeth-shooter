@@ -142,7 +142,6 @@
       <div id="beam-charge-text">必殺技：</div>
     </div>
 
-    <div id="mobile-tip">スマホは「長押し」でビーム</div>
   </div>
 
   <script>
@@ -180,11 +179,6 @@
       let playerX = window.innerWidth / 2;
 
       player.innerHTML = `<img src="${ASSET.player}" alt="player">`;
-
-      if (isMobile) {
-        mobileTip.style.display = 'block';
-        setTimeout(() => mobileTip.style.display = 'none', 2500);
-      }
 
       const updatePos = (x) => {
         playerX = Math.max(25, Math.min(x, window.innerWidth - 25));
