@@ -42,41 +42,58 @@
       z-index: 3;
     }
 
-    /* チャージバー横に常時表示 */
-    #charge-container {
+#charge-container {
   position: absolute;
-  bottom: 10px;
+  bottom: 6px;               /* 少し上に余裕 */
   left: 50%;
   transform: translateX(-50%);
   width: 320px;
-  height: 10px;
+  height: 18px;             /* 2段にするので高さを増やす */
 
-  background: #555;
-  border-radius: 5px;
+  background: transparent;
   z-index: 100;
-
   box-sizing: border-box;
-  overflow: hidden; /* 文字ははみ出ないように */
+  overflow: visible;
+
+  /* 2段 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;                 /* テキストとバーの間 */
 }
 
 #charge-bar {
-  position: absolute;
-  left: 0;
-  top: 2px;
+  width: 100%;
   height: 6px;
+  background: #00ffff;     /* この背景自体は色の基準用（実際の塗りはJSでwidth指定） */
+  border-radius: 5px;
+  transition: 0.2s;
+
+  /* JSの width=0..100% をちゃんと効かせるため、子要素的運用はしないので
+     ここでは「背景」を#00ffffのままにしないと見え方が変になる場合があります。
+     対策として、外枠の#charge-frameを使うので次のルールも追加します。 */
+}
+
+/* 外枠（背景グレーの枠）を作るためのフレーム */
+#charge-frame {
+  width: 100%;
+  height: 10px;
+  background: #555;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+/* 実際に伸びるバー */
+#charge-fill {
+  height: 100%;
   width: 0%;
   background: #00ffff;
   border-radius: 5px;
   transition: 0.2s;
-
-  /* これで文字に左右されなくなる */
 }
 
 #beam-charge-text {
-  position: absolute;
-  left: 50%;
-  top: -2px;                 /* ←バーの上に寄せる */
-  transform: translateX(-50%);
   font-size: 11.5px;
   font-weight: 950;
   color: rgba(40, 0, 45, 0.95);
@@ -84,7 +101,7 @@
   user-select: none;
   pointer-events: none;
   line-height: 1;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.6); /* ←読めるように */
+  text-shadow: 0 1px 0 rgba(255,255,255,0.6);
 }
     #boss-hp-container {
       position: absolute; top: 70px; left: 50%;
@@ -128,10 +145,12 @@
 
     <div id="boss-hp-container"><div id="boss-hp"></div></div>
 
-    <div id="charge-container">
-      <div id="charge-bar"></div>
-      <div id="beam-charge-text">必殺技：右クリック / 長押し</div>
-    </div>
+   <div id="charge-container">
+  <div id="charge-frame">
+    <div id="charge-fill"></div>
+  </div>
+  <div id="beam-charge-text">必殺技：右クリック / 長押し</div>
+</div>
 
     <div id="mobile-tip">スマホは「長押し」でビーム</div>
   </div>
@@ -156,7 +175,7 @@
 
       const player = document.getElementById('player');
       const container = document.getElementById('game-container');
-      const chargeBar = document.getElementById('charge-bar');
+      const chargeBar = document.getElementById('charge-fill');
       const bossHPBar = document.getElementById('boss-hp');
       const bossHPContainer = document.getElementById('boss-hp-container');
       const mobileTip = document.getElementById('mobile-tip');
