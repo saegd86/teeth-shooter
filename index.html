@@ -75,17 +75,16 @@
 #beam-charge-text {
   position: absolute;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-
+  top: -2px;                 /* ←バーの上に寄せる */
+  transform: translateX(-50%);
   font-size: 11.5px;
   font-weight: 950;
-  color: rgba(40, 0, 45, 0.9);
+  color: rgba(40, 0, 45, 0.95);
   white-space: nowrap;
   user-select: none;
-
-  /* バーが伸びても邪魔しない */
   pointer-events: none;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.6); /* ←読めるように */
 }
     #boss-hp-container {
       position: absolute; top: 70px; left: 50%;
