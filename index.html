@@ -20,7 +20,14 @@
       text-shadow: 2px 2px 0px white;
     }
 
-    #player { position: absolute; bottom: 60px; left: 50%; z-index: 10; transition: 0.05s; transform: translateX(-50%); }
+   #player {
+  position: absolute;
+  bottom: 80px; /* 60px→80px */
+  left: 50%;
+  z-index: 10;
+  transition: 0.05s;
+  transform: translateX(-50%);
+}
     #player img {
       width: 140px; height: 140px; object-fit: contain;
       display: block; user-select:none; pointer-events:none; -webkit-user-drag:none;
@@ -45,47 +52,49 @@
     }
 
     /* ここが重要：スマホで切れないよう fixed にする */
-    #charge-container {
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      width: 320px;
-      z-index: 9999;
 
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
 
-      pointer-events: none;
-    }
 
-    #charge-frame {
-      width: 100%;
-      height: 8px;
-      background: #555;
-      border-radius: 5px;
-      overflow: hidden;
-    }
+#charge-container {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;     /* もう少し上へ（被り防止） */
+  transform: translateX(-50%);
+  width: 320px;
+  z-index: 9999;
 
-    #charge-fill {
-      height: 100%;
-      width: 0%;
-      background: #00ffff;
-      border-radius: 5px;
-      transition: 0.2s;
-    }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;         /* バーとテキストの距離を確保 */
+  pointer-events: none;
+}
 
-    #beam-charge-text {
-      font-size: 11.5px;
-      font-weight: 950;
-      color: rgba(40, 0, 45, 0.95);
-      white-space: nowrap;
-      user-select: none;
-      line-height: 1;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.6);
-    }
+#charge-frame {
+  width: 100%;
+  height: 8px;
+  background: #555;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+#charge-fill {
+  height: 100%;
+  width: 0%;
+  background: #00ffff;
+  border-radius: 5px;
+  transition: 0.2s;
+}
+
+#beam-charge-text {
+  font-size: 11.5px;
+  font-weight: 950;
+  color: rgba(40, 0, 45, 0.98);
+  white-space: nowrap;
+  user-select: none;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+}
 
     #boss-hp-container {
       position: absolute; top: 70px; left: 50%;
@@ -294,37 +303,58 @@
         if (chargeFill) chargeFill.style.width = charge + '%';
       }, 220);
 
-      function spawnBoss() {
-        bossActive = true;
-        bossHP = 100;
-        bossHPContainer.style.display = 'block';
+    function spawnBoss() {
+  bossActive = true;
+  bossHP = 100;
+  bossHPContainer.style.display = 'block';
 
-        const boss = document.createElement('div');
-        boss.className = 'boss';
-        boss.innerHTML = `<img src="${ASSET.boss}" alt="boss">`;
+  const boss = document.createElement('div');
+  boss.className = 'boss';
+  boss.innerHTML = `<img src="${ASSET.boss}" alt="boss">`;
 
-        const centerX = window.innerWidth / 2;
-        boss.style.left = (centerX - 165) + 'px';
-        boss.style.top = '-180px';
-        container.appendChild(boss);
+  const bossSize = 330;           // 画像サイズ
+  const startX = window.innerWidth / 2 - bossSize / 2;
 
-        let ty = -180, tx = centerX - 165, dir = 1;
-        let bt = setInterval(() => {
-          if (ty < 120) ty += 2;
+  boss.style.left = startX + 'px';
+  boss.style.top = '-180px';
+  container.appendChild(boss);
 
-          tx += 3 * dir;
-          // 見切れOKでも、反転が細かく起きないように余白を増やす
-          if (tx > window.innerWidth - 330 - 220 || tx < -220) dir *= -1;
+  let ty = -180;
 
-          boss.style.top = ty + 'px';
-          boss.style.left = tx + 'px';
+  // 画面外OK：大きく外にはみ出しても反転を滑らかに
+  let tx = startX;
+  let dir = 1;
 
-          if (!bossActive) {
-            clearInterval(bt);
-            boss.remove();
-          }
-        }, 20);
-      }
+  // “境界を超えたら強制的に固定→dir切替”で、揺れ（行ったり来たり）を止める
+  const leftBound = -260;
+  const rightBound = window.innerWidth - bossSize + 260;
+
+  const stepX = 3; // 横移動速度（元の3に合わせる）
+  const stepY = 2; // 縦落ち速度
+
+  let bt = setInterval(() => {
+    if (!bossActive) {
+      clearInterval(bt);
+      boss.remove();
+      return;
+    }
+
+    if (ty < 120) ty += stepY;
+
+    tx += stepX * dir;
+
+    if (tx > rightBound) {
+      tx = rightBound;
+      dir = -1;
+    } else if (tx < leftBound) {
+      tx = leftBound;
+      dir = 1;
+    }
+
+    boss.style.top = ty + 'px';
+    boss.style.left = tx + 'px';
+  }, 20);
+}
 
       function damageBoss(amount) {
         bossHP -= amount;
