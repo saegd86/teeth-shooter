@@ -182,7 +182,7 @@
       let bossActive = false;
       let bossHP = 100;
 
-      let nextBossAt = 500;
+      let nextBossAt = 1000;
       const GAME_MS = 60 * 1000;
       const startTime = Date.now();
       timerEl.textContent = '60';
@@ -270,7 +270,7 @@
       const bulletInterval = setInterval(() => {
         if (GAME_ID !== myId) return;
 
-        let angles = score >= 3000 ? [-30, -15, 0, 15, 30] : [-15, 0, 15];
+        let angles = score >= 3000 ? [-20, 0, 20] : [-12, 0, 12];
 
         angles.forEach(angle => {
           const bullet = document.createElement('div');
@@ -381,7 +381,7 @@
         container.appendChild(enemy);
 
         let ePos = -50;
-        let speed = 4 + Math.min(score / 1500, 8);
+        let speed = 4.7 + Math.min(score / 1300, 9);
 
         const t = setInterval(() => {
           if (GAME_ID !== myId) { clearInterval(t); return; }
