@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>歯の防衛軍 - 滅菌大作戦（ランダム復刻版）</title>
   <style>
-    body { background: #222; color: white; text-align: center; margin: 0; font-family: sans-serif; }
+    body { background: #222; color: white; text-align: center; overflow: hidden; margin: 0; font-family: sans-serif; }
 
     #game-container {
       position: relative; width: 100vw; height: 100vh;
@@ -20,14 +20,18 @@
       text-shadow: 2px 2px 0px white;
     }
 
-   #player {
-  position: absolute;
-  bottom: 90px; /* 60px→90px */
-  left: 50%;
-  z-index: 10;
-  transition: 0.05s;
-  transform: translateX(-50%);
-}
+    #timer {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-weight: 900;
+      font-size: 26px;
+      color: #0066ff;
+      text-shadow: 1px 1px 0 rgba(255,255,255,0.7);
+      z-index: 100;
+    }
+
+    #player { position: absolute; bottom: 90px; left: 50%; z-index: 10; transition: 0.05s; transform: translateX(-50%); }
     #player img {
       width: 140px; height: 140px; object-fit: contain;
       display: block; user-select:none; pointer-events:none; -webkit-user-drag:none;
@@ -42,59 +46,53 @@
     .bullet { position: absolute; font-size: 25px; z-index: 4; pointer-events:none; user-select:none; }
 
     .beam {
-      position: absolute;
-      : 100px;
-      width: 50px;
+      position: absolute; bottom: 100px; width: 50px;
       background: rgba(0, 255, 255, 0.7);
       box-shadow: 0 0 20px #00ffff;
       transform: translateX(-50%);
       z-index: 3;
     }
 
-    /* ここが重要：スマホで切れないよう fixed にする */
+    /* チャージ */
+    #charge-container {
+      position: fixed;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(-50%);
+      width: 320px;
+      z-index: 9999;
 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
 
+      pointer-events: none;
+    }
 
-#charge-container {
-  position: fixed;
-  left: 50%;
-  bottom: 32px;     /* もう少し上へ（被り防止） */
-  transform: translateX(-50%);
-  width: 320px;
-  z-index: 9999;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;         /* バーとテキストの距離を確保 */
-  pointer-events: none;
-}
-
-#charge-frame {
-  width: 100%;
-  height: 8px;
-  background: #555;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-#charge-fill {
-  height: 100%;
-  width: 0%;
-  background: #00ffff;
-  border-radius: 5px;
-  transition: 0.2s;
-}
-
-#beam-charge-text {
-  font-size: 11.5px;
-  font-weight: 950;
-  color: rgba(40, 0, 45, 0.98);
-  white-space: nowrap;
-  user-select: none;
-  line-height: 1;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.6);
-}
+    #charge-frame {
+      width: 100%;
+      height: 8px;
+      background: #555;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    #charge-fill {
+      height: 100%;
+      width: 0%;
+      background: #00ffff;
+      border-radius: 5px;
+      transition: 0.2s;
+    }
+    #beam-charge-text {
+      font-size: 11.5px;
+      font-weight: 950;
+      color: rgba(40, 0, 45, 0.95);
+      white-space: nowrap;
+      user-select: none;
+      line-height: 1;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+    }
 
     #boss-hp-container {
       position: absolute; top: 70px; left: 50%;
@@ -111,21 +109,68 @@
       display: block; user-select:none; pointer-events:none; -webkit-user-drag:none;
     }
 
-    #mobile-tip {
-      position: absolute;
-      bottom: 82px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 130;
-      font-weight: 900;
-      font-size: 12px;
-      color: rgba(40, 0, 45, 0.8);
-      background: rgba(255, 255, 255, 0.4);
-      padding: 6px 10px;
-      border-radius: 999px;
+    #ranking {
+      position: fixed;
+      left: 12px;
+      bottom: 12px;
+      z-index: 200;
+      background: rgba(255,255,255,0.75);
+      color: #222;
+      border-radius: 12px;
+      padding: 10px 12px;
+      width: min(360px, 92vw);
+      max-height: 40vh;
+      overflow: auto;
       display: none;
-      pointer-events: none;
-      user-select: none;
+      backdrop-filter: blur(6px);
+      font-weight: 900;
+      text-align: left;
+    }
+    #ranking h3 { margin: 0 0 8px 0; font-size: 14px; }
+    #ranking table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    #ranking th, #ranking td { padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    #ranking th:last-child, #ranking td:last-child { text-align: right; padding-right: 6px; }
+
+    #start-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+    #start-box {
+      background: rgba(255,255,255,0.9);
+      color: #1b1b1b;
+      border-radius: 16px;
+      padding: 18px 16px;
+      width: min(520px, 92vw);
+      text-align: center;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    }
+    #start-box h2 { margin: 0 0 10px; }
+    #start-box p { margin: 0 0 14px; font-weight: 800; }
+    #name-input {
+      width: 100%;
+      max-width: 320px;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,105,180,0.6);
+      outline: none;
+      font-size: 16px;
+      font-weight: 800;
+    }
+    #start-btn {
+      margin-top: 12px;
+      width: 200px;
+      padding: 12px 0;
+      border: none;
+      border-radius: 12px;
+      background: #00ffff;
+      color: #003;
+      font-weight: 950;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0,255,255,0.25);
     }
   </style>
 </head>
@@ -133,96 +178,161 @@
 <body>
   <div id="game-container">
     <div id="score">SCORE: 0</div>
+    <div id="timer">60</div>
+
     <div id="player" aria-label="player"></div>
 
     <div id="boss-hp-container"><div id="boss-hp"></div></div>
 
     <div id="charge-container">
       <div id="charge-frame"><div id="charge-fill"></div></div>
-      <div id="beam-charge-text">必殺技：</div>
+      <div id="beam-charge-text">必殺技：右クリック / 長押し</div>
     </div>
+  </div>
 
+  <div id="ranking">
+    <h3>スコアランキング（上位10）</h3>
+    <div id="ranking-body"></div>
+  </div>
+
+  <div id="start-overlay">
+    <div id="start-box">
+      <h2>歯の防衛軍</h2>
+      <p>名前を入力して、60秒勝負！</p>
+      <input id="name-input" maxlength="12" placeholder="例：さえ" />
+      <div>
+        <button id="start-btn" type="button">開始</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    let __teethGameStarted = false;
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzHV87PFFH2r9JYBpsAR8Yp0PDiGnyKMM3I9CtVQaIYELsTh-yS8MtOvHmduTX27Rmg/exec';
 
-    function startGame() {
-      if (__teethGameStarted) return;
-      __teethGameStarted = true;
+    const playerAsset = 'https://lh3.googleusercontent.com/pw/AP1GczPPUkdPu1gSfXNsbBdZBNXv1AlPzWVFMrjIdTXKRw-f5DgveIpwMY-ABgIo2js4Us1s3CPaBYax_-a9jenFxFJY025Rqvjqv2vtOS-wxE8s34onCfj_kpuONJlDvaDrf1h9H6q_sqphX6s3WTWOVrRD=w729-h911-s-no-gm';
+    const enemyAsset  = 'https://lh3.googleusercontent.com/pw/AP1GczNJt7YEwIRTslg-7I4gO3tg_fC2ivisB2oqH_ft5-RMeT7vhwvVSENYrQtRrVmlmFbz5DTEpLtSEgnmedrN9pvfOObIff_BHA4JnA5XUvxCWOJa30ex625XCSNfzDcaJMqEyQBGG0fWi2jv63v_r_JI=w350-h362-s-no-gm';
+    const bossAsset   = 'https://lh3.googleusercontent.com/pw/AP1GczMU093fP2J-3ZzNUZH79PVwl2HYqxMlnPCHTT6Qfd-8j9CnC9Cz2MJBttzK70lNc_dA_19XFP83LB7KjfxSMnZYkRBCosayb0JWO_nw1lkoGIvoLpv2dB7Yrrz6lq7jV1FPT_SkNjQXcNyFhqNQBzIC=w729-h911-s-no-gm';
 
+    const startOverlay = document.getElementById('start-overlay');
+    const nameInput = document.getElementById('name-input');
+    const startBtn = document.getElementById('start-btn');
+
+    const scoreEl = document.getElementById('score');
+    const timerEl = document.getElementById('timer');
+
+    const playerEl = document.getElementById('player');
+    const container = document.getElementById('game-container');
+    const chargeFill = document.getElementById('charge-fill');
+    const bossHPBar = document.getElementById('boss-hp');
+    const bossHPContainer = document.getElementById('boss-hp-container');
+
+    const rankingEl = document.getElementById('ranking');
+    const rankingBody = document.getElementById('ranking-body');
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[c]));
+    }
+
+    async function apiAddScore(name, score) {
+      const url = GAS_URL + '?action=add&name=' + encodeURIComponent(name) + '&score=' + encodeURIComponent(score);
+      const res = await fetch(url, { method: 'POST' });
+      return res.json().catch(() => ({}));
+    }
+
+    async function apiGetTop() {
+      const url = GAS_URL + '?action=list';
+      const res = await fetch(url, { method: 'GET' });
+      return res.json();
+    }
+
+    function renderRanking(top) {
+      const rows = (top || []).map((r, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${escapeHtml(r.name || '')}</td>
+          <td>${Number(r.score || 0).toLocaleString()}</td>
+        </tr>
+      `).join('');
+
+      rankingBody.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>#</th><th>name</th><th>score</th></tr>
+          </thead>
+          <tbody>${rows || '<tr><td colspan="3">まだデータなし</td></tr>'}</tbody>
+        </table>
+      `;
+    }
+
+    function startGameWithName(name) {
       let score = 0;
       let charge = 0;
       let bossActive = false;
       let bossHP = 100;
 
-      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      let enemyInterval = null;
+      let bulletInterval = null;
 
-      const ASSET = {
-        player: 'https://lh3.googleusercontent.com/pw/AP1GczPPUkdPu1gSfXNsbBdZBNXv1AlPzWVFMrjIdTXKRw-f5DgveIpwMY-ABgIo2js4Us1s3CPaBYax_-a9jenFxFJY025Rqvjqv2vtOS-wxE8s34onCfj_kpuONJlDvaDrf1h9H6q_sqphX6s3WTWOVrRD=w729-h911-s-no-gm',
-        enemy:  'https://lh3.googleusercontent.com/pw/AP1GczNJt7YEwIRTslg-7I4gO3tg_fC2ivisB2oqH_ft5-RMeT7vhwvVSENYrQtRrVmlmFbz5DTEpLtSEgnmedrN9pvfOObIff_BHA4JnA5XUvxCWOJa30ex625XCSNfzDcaJMqEyQBGG0fWi2jv63v_r_JI=w350-h362-s-no-gm',
-        boss:   'https://lh3.googleusercontent.com/pw/AP1GczMU093fP2J-3ZzNUZH79PVwl2HYqxMlnPCHTT6Qfd-8j9CnC9Cz2MJBttzK70lNc_dA_19XFP83LB7KjfxSMnZYkRBCosayb0JWO_nw1lkoGIvoLpv2dB7Yrrz6lq7jV1FPT_SkNjQXcNyFhqNQBzIC=w729-h911-s-no-gm'
-      };
+      const GAME_MS = 60 * 1000;
+      const startTime = Date.now();
+      timerEl.textContent = '60';
 
-      const player = document.getElementById('player');
-      const container = document.getElementById('game-container');
-      const chargeFill = document.getElementById('charge-fill');
-      const bossHPBar = document.getElementById('boss-hp');
-      const bossHPContainer = document.getElementById('boss-hp-container');
-      const mobileTip = document.getElementById('mobile-tip');
-      const beamChargeText = document.getElementById('beam-charge-text');
-
-      if (beamChargeText) {
-        beamChargeText.textContent = isMobile ? '必殺技：長押し' : '必殺技：右クリック';
-      }
+      playerEl.innerHTML = `<img src="${playerAsset}" alt="player">`;
 
       let playerX = window.innerWidth / 2;
 
-      player.innerHTML = `<img src="${ASSET.player}" alt="player">`;
-
       const updatePos = (x) => {
         playerX = Math.max(25, Math.min(x, window.innerWidth - 25));
-        player.style.left = playerX + 'px';
+        playerEl.style.left = playerX + 'px';
       };
+      updatePos(playerX);
 
-      container.addEventListener('mousemove', (e) => updatePos(e.clientX));
-      container.addEventListener('touchmove', (e) => {
-        updatePos(e.touches[0].clientX);
-        e.preventDefault();
-      }, { passive: false });
+      const damageBoss = (amount) => {
+        bossHP -= amount;
+        bossHPBar.style.width = bossHP + '%';
+
+        if (bossHP <= 0) {
+          bossActive = false;
+          bossHPContainer.style.display = 'none';
+          score += 1000;
+          scoreEl.innerText = "SCORE: " + score;
+
+          const b = document.querySelector('.boss');
+          if (b) { b.innerHTML = '✨💥✨'; setTimeout(() => b.remove(), 500); }
+        }
+      };
 
       const fireBeam = () => {
         if (charge < 100) return;
-
         charge = 0;
         if (chargeFill) chargeFill.style.width = '0%';
 
         const beam = document.createElement('div');
         beam.className = 'beam';
-        beam.style.left = player.style.left;
+        beam.style.left = playerEl.style.left;
         container.appendChild(beam);
 
         let h = 0;
-        let beamTimer = setInterval(() => {
+        const beamTimer = setInterval(() => {
           h += 60;
           beam.style.height = h + 'px';
 
-          // 敵（ビームで撃破）
+          // 敵撃破（ビーム）
           const enemies = document.getElementsByClassName('enemy');
           for (let e of enemies) {
             if (e.dataset.state !== 'alive') continue;
-
             if (Math.abs(parseInt(e.style.left) - (playerX - 25)) < 70) {
               e.dataset.state = 'dead';
               score += 20;
-              document.getElementById('score').innerText = "SCORE: " + score;
-
+              scoreEl.innerText = "SCORE: " + score;
               e.innerHTML = '✨';
               setTimeout(() => e.remove(), 100);
             }
           }
 
-          // ボス（ビームでダメージ）
+          // ボスダメージ（ビーム：強い）
           if (bossActive) {
             const bElement = document.querySelector('.boss');
             if (bElement) {
@@ -238,37 +348,22 @@
         }, 10);
       };
 
-      // PC：右クリック
-      container.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        fireBeam();
-      });
+      // 入力
+      container.onmousemove = (e) => updatePos(e.clientX);
+      container.ontouchmove = (e) => { updatePos(e.touches[0].clientX); e.preventDefault(); };
+      container.oncontextmenu = (e) => { e.preventDefault(); fireBeam(); };
 
-      // スマホ：長押し
       let longPressTimer = null;
-      container.addEventListener('touchstart', () => {
-        longPressTimer = setTimeout(() => fireBeam(), 550);
-      }, { passive: true });
+      container.ontouchstart = () => { longPressTimer = setTimeout(() => fireBeam(), 550); };
+      container.ontouchend = () => { if (longPressTimer) clearTimeout(longPressTimer); longPressTimer = null; };
+      container.ontouchcancel = () => { if (longPressTimer) clearTimeout(longPressTimer); longPressTimer = null; };
 
-      container.addEventListener('touchend', () => {
-        if (longPressTimer) clearTimeout(longPressTimer);
-        longPressTimer = null;
-      });
-
-      container.addEventListener('touchcancel', () => {
-        if (longPressTimer) clearTimeout(longPressTimer);
-        longPressTimer = null;
-      });
-
-      window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space' || e.keyCode === 32) {
-          e.preventDefault();
-          fireBeam();
-        }
-      });
+      window.onkeydown = (e) => {
+        if (e.code === 'Space' || e.keyCode === 32) { e.preventDefault(); fireBeam(); }
+      };
 
       // 弾（💧）
-      setInterval(() => {
+      bulletInterval = setInterval(() => {
         let angles = score >= 3000 ? [-30, -15, 0, 15, 30] : [-15, 0, 15];
 
         angles.forEach(angle => {
@@ -280,7 +375,7 @@
           container.appendChild(bullet);
 
           let bPB = 90, bPL = playerX - 12;
-          let t = setInterval(() => {
+          const t = setInterval(() => {
             bPB += 18;
             bPL += (angle / 4);
             bullet.style.bottom = bPB + 'px';
@@ -297,83 +392,86 @@
         if (chargeFill) chargeFill.style.width = charge + '%';
       }, 220);
 
-    function spawnBoss() {
-  bossActive = true;
-  bossHP = 100;
-  bossHPContainer.style.display = 'block';
+      function spawnBoss() {
+        bossActive = true;
+        bossHP = 100;
+        bossHPContainer.style.display = 'block';
 
-  const boss = document.createElement('div');
-  boss.className = 'boss';
-  boss.innerHTML = `<img src="${ASSET.boss}" alt="boss">`;
+        const boss = document.createElement('div');
+        boss.className = 'boss';
+        boss.innerHTML = `<img src="${bossAsset}" alt="boss">`;
 
-  const bossSize = 330;           // 画像サイズ
-  const startX = window.innerWidth / 2 - bossSize / 2;
+        const bossSize = 330;
+        const startX = window.innerWidth / 2 - bossSize / 2;
 
-  boss.style.left = startX + 'px';
-  boss.style.top = '-180px';
-  container.appendChild(boss);
+        boss.style.left = startX + 'px';
+        boss.style.top = '-180px';
+        container.appendChild(boss);
 
-  let ty = -180;
+        let ty = -180;
+        let tx = startX;
+        let dir = 1;
 
-  // 画面外OK：大きく外にはみ出しても反転を滑らかに
-  let tx = startX;
-  let dir = 1;
+        const leftBound = -260;
+        const rightBound = window.innerWidth - bossSize + 260;
 
-  // “境界を超えたら強制的に固定→dir切替”で、揺れ（行ったり来たり）を止める
-  const leftBound = -260;
-  const rightBound = window.innerWidth - bossSize + 260;
+        const stepX = 3;
+        const stepY = 2;
 
-  const stepX = 3; // 横移動速度（元の3に合わせる）
-  const stepY = 2; // 縦落ち速度
+        const bt = setInterval(() => {
+          if (!bossActive) {
+            clearInterval(bt);
+            boss.remove();
+            return;
+          }
 
-  let bt = setInterval(() => {
-    if (!bossActive) {
-      clearInterval(bt);
-      boss.remove();
-      return;
-    }
+          if (ty < 120) ty += stepY;
 
-    if (ty < 120) ty += stepY;
+          tx += stepX * dir;
+          if (tx > rightBound) { tx = rightBound; dir = -1; }
+          if (tx < leftBound) { tx = leftBound; dir = 1; }
 
-    tx += stepX * dir;
-
-    if (tx > rightBound) {
-      tx = rightBound;
-      dir = -1;
-    } else if (tx < leftBound) {
-      tx = leftBound;
-      dir = 1;
-    }
-
-    boss.style.top = ty + 'px';
-    boss.style.left = tx + 'px';
-  }, 20);
-}
-
-      function damageBoss(amount) {
-        bossHP -= amount;
-        bossHPBar.style.width = bossHP + '%';
-
-        if (bossHP <= 0) {
-          bossActive = false;
-          bossHPContainer.style.display = 'none';
-
-          score += 1000;
-          document.getElementById('score').innerText = "SCORE: " + score;
-
-          const b = document.querySelector('.boss');
-          if (b) b.innerHTML = '✨💥✨';
-          setTimeout(() => { if (b) b.remove(); }, 500);
-        }
+          boss.style.top = ty + 'px';
+          boss.style.left = tx + 'px';
+        }, 20);
       }
 
-      setInterval(() => {
+      // ボス通常弾ダメージ（必殺技じゃないと削れない問題を解消）
+      const bossDamageInterval = setInterval(() => {
+        if (!bossActive) return;
+
+        const bossEl = document.querySelector('.boss');
+        if (!bossEl) return;
+
+        const bossCenterX = parseInt(bossEl.style.left) + 165;
+        const bossCenterY = parseInt(bossEl.style.top) + 165;
+
+        // ボスへ当たった💧を少しずつ削る
+        const bullets = document.getElementsByClassName('bullet');
+        for (let b of bullets) {
+          const bulletLeft = parseInt(b.style.left);
+          const bulletTop = container.offsetHeight - parseInt(b.style.bottom) - 25;
+
+          const dx = Math.abs(bulletLeft + 12 - bossCenterX);
+          const dy = Math.abs(bulletTop - bossCenterY);
+
+          // 当たり判定（ビームより弱くてOK）
+          if (dx < 70 && dy < 90) {
+            b.remove();
+            damageBoss(2); // 通常は弱め
+            break; // 連打しすぎ防止
+          }
+        }
+      }, 80);
+
+      // 敵生成（さらに増やす：520ms -> 450ms）
+      enemyInterval = setInterval(() => {
         if (bossActive) return;
 
         const enemy = document.createElement('div');
         enemy.className = 'enemy';
         enemy.dataset.state = 'alive';
-        enemy.innerHTML = `<img src="${ASSET.enemy}" alt="enemy">`;
+        enemy.innerHTML = `<img src="${enemyAsset}" alt="enemy">`;
         enemy.style.left = Math.random() * (window.innerWidth - 50) + 'px';
         enemy.style.top = '-50px';
         container.appendChild(enemy);
@@ -381,10 +479,11 @@
         let ePos = -50;
         let speed = 4 + Math.min(score / 1500, 8);
 
-        let t = setInterval(() => {
+        const t = setInterval(() => {
           ePos += speed;
           enemy.style.top = ePos + 'px';
 
+          // 通常弾で敵を撃破
           const bullets = document.getElementsByClassName('bullet');
           for (let b of bullets) {
             if (enemy.dataset.state !== 'alive') continue;
@@ -404,15 +503,16 @@
               msg.innerText = msgs[Math.floor(Math.random() * msgs.length)];
               msg.style.cssText = `position:absolute; left:${enemy.style.left}; top:${enemy.style.top}; color:#ff00ff; font-weight:bold; font-size:18px; z-index:50; pointer-events:none;`;
               container.appendChild(msg);
-
               setTimeout(() => msg.remove(), 500);
-              setTimeout(() => enemy.remove(), 100);
 
               b.remove();
               score += 10;
-              document.getElementById('score').innerText = "SCORE: " + score;
+              scoreEl.innerText = "SCORE: " + score;
+
+              setTimeout(() => enemy.remove(), 100);
 
               if (score > 0 && score % 500 === 0) spawnBoss();
+              clearInterval(t);
               return;
             }
           }
@@ -422,36 +522,49 @@
             enemy.remove();
           }
         }, 20);
-      }, 700);
+      }, 450);
 
-      // ボスが出ている間：💧でボスにもダメージ
-      setInterval(() => {
-        if (!bossActive) return;
+      const endGame = async () => {
+        clearInterval(enemyInterval);
+        clearInterval(bulletInterval);
+        clearInterval(bossDamageInterval);
 
-        const bossEl = document.querySelector('.boss');
-        if (!bossEl) return;
+        [...document.getElementsByClassName('enemy')].forEach(x => x.remove());
+        [...document.getElementsByClassName('bullet')].forEach(x => x.remove());
+        const b = document.querySelector('.boss');
+        if (b) b.remove();
 
-        const bossCenterX = parseInt(bossEl.style.left) + 165;
-        const bossCenterY = parseInt(bossEl.style.top) + 165;
+        scoreEl.innerText = "SCORE: " + score;
 
-        const bullets = document.getElementsByClassName('bullet');
-        for (let b of bullets) {
-          const bulletLeft = parseInt(b.style.left);
-          const bulletTop = container.offsetHeight - parseInt(b.style.bottom) - 25;
+        try { await apiAddScore(name, score); } catch (err) { console.warn(err); }
 
-          const dx = Math.abs(bulletLeft + 12 - bossCenterX);
-          const dy = Math.abs(bulletTop - bossCenterY);
+        try {
+          const data = await apiGetTop();
+          renderRanking(data.top || []);
+          rankingEl.style.display = 'block';
+        } catch (err) { console.warn(err); }
 
-          if (dx < 45 && dy < 60) {
-            b.remove();
-            damageBoss(3);
-            break;
-          }
+        startOverlay.style.display = 'flex';
+      };
+
+      const timerTick = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remain = Math.max(0, GAME_MS - elapsed);
+        const sec = Math.ceil(remain / 1000);
+        timerEl.textContent = String(sec);
+        if (remain <= 0) {
+          clearInterval(timerTick);
+          endGame();
         }
-      }, 80);
+      }, 100);
     }
 
-    startGame();
+    startBtn.addEventListener('click', () => {
+      const name = (nameInput.value || '').trim() || '名無し';
+      startOverlay.style.display = 'none';
+      rankingEl.style.display = 'none';
+      startGameWithName(name);
+    });
   </script>
 </body>
 </html>
