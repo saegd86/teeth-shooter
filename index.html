@@ -14,20 +14,8 @@
       overflow: hidden; touch-action: none; cursor: crosshair;
     }
 
-    #score {
-      position: absolute; top: 20px; left: 20px;
-      color: #d00000; font-size: 32px; font-weight: bold; z-index: 100;
-      text-shadow: 2px 2px 0px white;
-    }
-
-    #timer {
-      position: absolute;
-      top: 20px; right: 20px;
-      font-weight: 900; font-size: 26px;
-      color: #0066ff;
-      text-shadow: 1px 1px 0 rgba(255,255,255,0.7);
-      z-index: 100;
-    }
+    #score { position: absolute; top: 20px; left: 20px; color: #d00000; font-size: 32px; font-weight: bold; z-index: 100; text-shadow: 2px 2px 0px white; }
+    #timer { position: absolute; top: 20px; right: 20px; font-weight: 900; font-size: 26px; color: #0066ff; text-shadow: 1px 1px 0 rgba(255,255,255,0.7); z-index: 100; }
 
     #player { position: absolute; bottom: 90px; left: 50%; z-index: 10; transition: 0.05s; transform: translateX(-50%); }
     #player img { width: 140px; height: 140px; object-fit: contain; display: block; user-select:none; pointer-events:none; -webkit-user-drag:none; }
@@ -37,32 +25,12 @@
 
     .bullet { position: absolute; font-size: 25px; z-index: 4; pointer-events:none; user-select:none; }
 
-    .beam {
-      position: absolute; bottom: 100px; width: 50px;
-      background: rgba(0, 255, 255, 0.7);
-      box-shadow: 0 0 20px #00ffff;
-      transform: translateX(-50%);
-      z-index: 3;
-    }
+    .beam { position: absolute; bottom: 100px; width: 50px; background: rgba(0, 255, 255, 0.7); box-shadow: 0 0 20px #00ffff; transform: translateX(-50%); z-index: 3; }
 
-    #charge-container {
-      position: fixed;
-      left: 50%;
-      bottom: 26px;
-      transform: translateX(-50%);
-      width: 320px;
-      z-index: 9999;
-
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 7px;
-      pointer-events: none;
-    }
-
+    #charge-container { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); width: 320px; z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 7px; pointer-events: none; }
     #charge-frame { width: 100%; height: 8px; background: #555; border-radius: 5px; overflow: hidden; }
     #charge-fill { height: 100%; width: 0%; background: #00ffff; border-radius: 5px; transition: 0.2s; }
-    #beam-charge-text { font-size: 11.5px; font-weight: 950; color: rgba(40, 0, 45, 0.95); white-space: nowrap; user-select:none; line-height: 1; text-shadow: 0 1px 0 rgba(255,255,255,0.6); }
+    #beam-charge-text { font-size: 11.5px; font-weight: 950; color: rgba(40, 0, 45, 0.95); white-space: nowrap; user-select: none; line-height: 1; text-shadow: 0 1px 0 rgba(255,255,255,0.6); }
 
     #boss-hp-container { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); width: 80%; height: 20px; background: #333; display: none; z-index: 100; }
     #boss-hp { width: 100%; height: 100%; background: #ff0000; }
@@ -70,7 +38,7 @@
     .boss { position: absolute; z-index: 6; }
     .boss img { width: 330px; height: 330px; object-fit: contain; display: block; user-select:none; pointer-events:none; -webkit-user-drag:none; }
 
-    /* 開始 */
+    /* 開始・結果オーバーレイ */
     #start-overlay, #result-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.25);
@@ -105,14 +73,7 @@
     }
 
     .btn { border: none; border-radius: 12px; cursor: pointer; font-weight: 950; }
-    #start-btn {
-      margin-top: 12px;
-      width: 200px;
-      padding: 12px 0;
-      background: #00ffff;
-      color: #003;
-      box-shadow: 0 8px 18px rgba(0,255,255,0.25);
-    }
+    #start-btn { margin-top: 12px; width: 200px; padding: 12px 0; background: #00ffff; color: #003; box-shadow: 0 8px 18px rgba(0,255,255,0.25); }
 
     #result-title { margin: 0 0 10px; font-size: 18px; font-weight: 1000; }
     #result-score { margin: 0 0 10px; font-size: 16px; font-weight: 950; color: #d00000; }
@@ -127,7 +88,7 @@
     #change-name-btn { width: 300px; padding: 12px 0; background: rgba(255,105,180,0.18); color:#550028; border:2px solid rgba(255,105,180,0.35); }
 
     #ranking-note { margin-top: 10px; font-size: 12px; color: rgba(0,0,0,0.55); font-weight: 800; }
-
+    #loading-ranking { margin-top: 14px; font-weight: 1000; color: rgba(0,0,0,0.5); }
   </style>
 </head>
 
@@ -173,6 +134,8 @@
         </table>
       </div>
 
+      <div id="loading-ranking">ランキング取得中…</div>
+
       <div class="row-buttons">
         <button id="retry-btn" class="btn" type="button">リトライ</button>
         <button id="change-name-btn" class="btn" type="button">名前変更してリトライ</button>
@@ -198,6 +161,7 @@
     const changeNameBtn = document.getElementById('change-name-btn');
     const resultScoreEl = document.getElementById('result-score');
     const rankingTbody = document.getElementById('ranking-tbody');
+    const loadingRankingEl = document.getElementById('loading-ranking');
 
     const scoreEl = document.getElementById('score');
     const timerEl = document.getElementById('timer');
@@ -244,8 +208,53 @@
       bossHPContainer.style.display = 'none';
     }
 
-    // 重要：多重起動防止用のフラグ
     let GAME_ID = 0;
+
+    function spawnBossIfNeeded() {
+      // ★ボス渋滞防止：既にボスDOMがあるなら出さない
+      if (document.querySelector('.boss')) return false;
+      if (bossActive) return false;
+
+      bossActive = true;
+      bossHP = 100;
+      bossHPContainer.style.display = 'block';
+
+      const boss = document.createElement('div');
+      boss.className = 'boss';
+      boss.innerHTML = `<img src="${bossAsset}" alt="boss">`;
+
+      const bossSize = 330;
+      const startX = window.innerWidth / 2 - bossSize / 2;
+
+      boss.style.left = startX + 'px';
+      boss.style.top = '-180px';
+      container.appendChild(boss);
+
+      let ty = -180;
+      let tx = startX;
+      let dir = 1;
+
+      const leftBound = -260;
+      const rightBound = window.innerWidth - bossSize + 260;
+      const stepX = 3;
+      const stepY = 2;
+
+      const bt = setInterval(() => {
+        if (GAME_ID !== myId) { clearInterval(bt); return; }
+        if (!bossActive) { clearInterval(bt); boss.remove(); return; }
+
+        if (ty < 120) ty += stepY;
+
+        tx += stepX * dir;
+        if (tx > rightBound) { tx = rightBound; dir = -1; }
+        if (tx < leftBound) { tx = leftBound; dir = 1; }
+
+        boss.style.top = ty + 'px';
+        boss.style.left = tx + 'px';
+      }, 20);
+
+      return true;
+    }
 
     function startGameWithName(name) {
       GAME_ID++;
@@ -257,10 +266,11 @@
 
       let score = 0;
       let charge = 0;
-      let bossActive = false;
-      let bossHP = 100;
+      bossActive = false;
+      bossHP = 100;
 
-      let nextBossAt = 500; // ★500刻みで確実に出す
+      let nextBossAt = 500;
+
       const GAME_MS = 60 * 1000;
       const startTime = Date.now();
       timerEl.textContent = '60';
@@ -291,7 +301,6 @@
 
       const fireBeam = () => {
         if (charge < 100) return;
-
         charge = 0;
         if (chargeFill) chargeFill.style.width = '0%';
 
@@ -382,53 +391,14 @@
         if (chargeFill) chargeFill.style.width = charge + '%';
       }, 220);
 
-      function spawnBoss() {
-        bossActive = true;
-        bossHP = 100;
-        bossHPContainer.style.display = 'block';
+      function getBossEl() { return document.querySelector('.boss'); }
 
-        const boss = document.createElement('div');
-        boss.className = 'boss';
-        boss.innerHTML = `<img src="${bossAsset}" alt="boss">`;
-
-        const bossSize = 330;
-        const startX = window.innerWidth / 2 - bossSize / 2;
-
-        boss.style.left = startX + 'px';
-        boss.style.top = '-180px';
-        container.appendChild(boss);
-
-        let ty = -180;
-        let tx = startX;
-        let dir = 1;
-
-        const leftBound = -260;
-        const rightBound = window.innerWidth - bossSize + 260;
-
-        const stepX = 3;
-        const stepY = 2;
-
-        const bt = setInterval(() => {
-          if (GAME_ID !== myId) { clearInterval(bt); return; }
-          if (!bossActive) { clearInterval(bt); boss.remove(); return; }
-
-          if (ty < 120) ty += stepY;
-
-          tx += stepX * dir;
-          if (tx > rightBound) { tx = rightBound; dir = -1; }
-          if (tx < leftBound) { tx = leftBound; dir = 1; }
-
-          boss.style.top = ty + 'px';
-          boss.style.left = tx + 'px';
-        }, 20);
-      }
-
-      // ボス通常弾ダメージ（倒しやすく：3）
+      // ボス通常弾ダメージ（3）
       const bossDamageInterval = setInterval(() => {
         if (GAME_ID !== myId) return;
         if (!bossActive) return;
 
-        const bossEl = document.querySelector('.boss');
+        const bossEl = getBossEl();
         if (!bossEl) return;
 
         const bossCenterX = parseInt(bossEl.style.left) + 165;
@@ -450,12 +420,12 @@
         }
       }, 80);
 
-      // 敵生成（さらに増やす：360ms相当）
+      // 敵生成（360→今のままでOK。さらに増やすならここ）
       const ENEMY_INTERVAL_MS = 360;
 
       const enemyInterval = setInterval(() => {
         if (GAME_ID !== myId) return;
-        if (bossActive) return;
+        if (bossActive || document.querySelector('.boss')) return;
 
         const enemy = document.createElement('div');
         enemy.className = 'enemy';
@@ -494,10 +464,14 @@
 
               setTimeout(() => enemy.remove(), 100);
 
-              // ★確実にボス出現（次の閾値を超えたら）
-              if (score >= nextBossAt) {
+              // ボス閾値到達：ただしボスが既にいないときだけ生成
+              while (score >= nextBossAt) {
+                // 既にボスがいるなら生成せず、閾値だけ進めないと永遠にこないので進める
+                if (!document.querySelector('.boss') && !bossActive) {
+                  spawnBossIfNeeded();
+                }
                 nextBossAt += 500;
-                spawnBoss();
+                if (document.querySelector('.boss')) break;
               }
 
               clearInterval(t);
@@ -533,28 +507,35 @@
 
           scoreEl.innerText = "SCORE: " + score;
 
-          // ここから：まず結果画面を先に出してラグを短縮
+          // 結果表示：先に出すが、ランキングは“取得完了後”に描画
           resultScoreEl.textContent = `今回のスコア：${score.toLocaleString()}`;
-          renderRanking([]); // 一旦空
+          rankingTbody.innerHTML = `<tr><td colspan="3">読み込み中…</td></tr>`;
+          loadingRankingEl.style.display = 'block';
+
           resultOverlay.style.display = 'flex';
           startOverlay.style.display = 'none';
 
-          // 送信＆ランキング取得（遅くても画面は即出る）
           try { await apiAddScore(name, score); } catch (err) { console.warn(err); }
 
           try {
             const data = await apiGetTop();
             const top = data.top || [];
-            if (GAME_ID === myId) renderRanking(top);
+            if (GAME_ID === myId) {
+              renderRanking(top);
+              loadingRankingEl.style.display = 'none';
+            }
           } catch (err) {
             console.warn(err);
-            if (GAME_ID === myId) renderRanking([]);
+            if (GAME_ID === myId) {
+              renderRanking([]);
+              loadingRankingEl.style.display = 'none';
+            }
           }
         }
       }, 100);
     }
 
-    function showStartWithOptionalName() {
+    function showStart() {
       resultOverlay.style.display = 'none';
       startOverlay.style.display = 'flex';
       const stored = localStorage.getItem('teeth_name') || '';
@@ -562,12 +543,8 @@
       nameInput.focus();
     }
 
-    // 初回UI
-    const storedName = localStorage.getItem('teeth_name');
-    if (storedName) {
-      // 入っているなら自動で値だけ入れる（開始はボタン）
-      nameInput.value = storedName;
-    }
+    // 初期表示
+    showStart();
 
     startBtn.addEventListener('click', () => {
       const name = (nameInput.value || '').trim() || '名無し';
@@ -585,7 +562,7 @@
     });
 
     changeNameBtn.addEventListener('click', () => {
-      showStartWithOptionalName();
+      showStart();
     });
   </script>
 </body>
