@@ -182,7 +182,7 @@
       let bossActive = false;
       let bossHP = 100;
 
-      let nextBossAt = 1000;
+      let nextBossAt = 1500;
       const GAME_MS = 60 * 1000;
       const startTime = Date.now();
       timerEl.textContent = '60';
@@ -270,7 +270,8 @@
       const bulletInterval = setInterval(() => {
         if (GAME_ID !== myId) return;
 
-        let angles = score >= 3000 ? [-20, 0, 20] : [-12, 0, 12];
+        // 💧 1本だけ：-10/0/10からランダム
+        let angles = [ [-8, 0, 8][Math.floor(Math.random() * 3)] ];
 
         angles.forEach(angle => {
           const bullet = document.createElement('div');
