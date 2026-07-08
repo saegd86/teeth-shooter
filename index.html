@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>歯の防衛軍 - 滅菌大作戦（ランダム復刻版）</title>
+  <title>歯の防衛軍 - 滅菌大作戦（ランキング版）</title>
   <style>
     body { background: #222; color: white; text-align: center; overflow: hidden; margin: 0; font-family: sans-serif; }
 
@@ -22,26 +22,18 @@
 
     #timer {
       position: absolute;
-      top: 20px;
-      right: 20px;
-      font-weight: 900;
-      font-size: 26px;
+      top: 20px; right: 20px;
+      font-weight: 900; font-size: 26px;
       color: #0066ff;
       text-shadow: 1px 1px 0 rgba(255,255,255,0.7);
       z-index: 100;
     }
 
     #player { position: absolute; bottom: 90px; left: 50%; z-index: 10; transition: 0.05s; transform: translateX(-50%); }
-    #player img {
-      width: 140px; height: 140px; object-fit: contain;
-      display: block; user-select:none; pointer-events:none; -webkit-user-drag:none;
-    }
+    #player img { width: 140px; height: 140px; object-fit: contain; display: block; user-select:none; pointer-events:none; -webkit-user-drag:none; }
 
     .enemy { position: absolute; z-index: 5; }
-    .enemy img {
-      width: 50px; height: 50px; object-fit: contain;
-      display: block; user-select:none; pointer-events:none; -webkit-user-drag:none;
-    }
+    .enemy img { width: 50px; height: 50px; object-fit: contain; display: block; user-select:none; pointer-events:none; -webkit-user-drag:none; }
 
     .bullet { position: absolute; font-size: 25px; z-index: 4; pointer-events:none; user-select:none; }
 
@@ -53,7 +45,6 @@
       z-index: 3;
     }
 
-    /* チャージ */
     #charge-container {
       position: fixed;
       left: 50%;
@@ -66,50 +57,20 @@
       flex-direction: column;
       align-items: center;
       gap: 7px;
-
       pointer-events: none;
     }
 
-    #charge-frame {
-      width: 100%;
-      height: 8px;
-      background: #555;
-      border-radius: 5px;
-      overflow: hidden;
-    }
-    #charge-fill {
-      height: 100%;
-      width: 0%;
-      background: #00ffff;
-      border-radius: 5px;
-      transition: 0.2s;
-    }
-    #beam-charge-text {
-      font-size: 11.5px;
-      font-weight: 950;
-      color: rgba(40, 0, 45, 0.95);
-      white-space: nowrap;
-      user-select: none;
-      line-height: 1;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.6);
-    }
+    #charge-frame { width: 100%; height: 8px; background: #555; border-radius: 5px; overflow: hidden; }
+    #charge-fill { height: 100%; width: 0%; background: #00ffff; border-radius: 5px; transition: 0.2s; }
+    #beam-charge-text { font-size: 11.5px; font-weight: 950; color: rgba(40, 0, 45, 0.95); white-space: nowrap; user-select:none; line-height: 1; text-shadow: 0 1px 0 rgba(255,255,255,0.6); }
 
-    #boss-hp-container {
-      position: absolute; top: 70px; left: 50%;
-      transform: translateX(-50%);
-      width: 80%; height: 20px;
-      background: #333; display: none; z-index: 100;
-    }
+    #boss-hp-container { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); width: 80%; height: 20px; background: #333; display: none; z-index: 100; }
     #boss-hp { width: 100%; height: 100%; background: #ff0000; }
 
     .boss { position: absolute; z-index: 6; }
-    .boss img {
-      width: 330px; height: 330px;
-      object-fit: contain;
-      display: block; user-select:none; pointer-events:none; -webkit-user-drag:none;
-    }
+    .boss img { width: 330px; height: 330px; object-fit: contain; display: block; user-select:none; pointer-events:none; -webkit-user-drag:none; }
 
-    /* 開始・結果オーバーレイ */
+    /* 開始 */
     #start-overlay, #result-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.25);
@@ -143,12 +104,7 @@
       font-weight: 800;
     }
 
-    .btn {
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 950;
-    }
+    .btn { border: none; border-radius: 12px; cursor: pointer; font-weight: 950; }
     #start-btn {
       margin-top: 12px;
       width: 200px;
@@ -161,54 +117,17 @@
     #result-title { margin: 0 0 10px; font-size: 18px; font-weight: 1000; }
     #result-score { margin: 0 0 10px; font-size: 16px; font-weight: 950; color: #d00000; }
 
-    #ranking-table-wrap {
-      margin-top: 10px;
-      text-align: left;
-      max-height: 38vh;
-      overflow: auto;
-    }
-    #ranking-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      color: #222;
-    }
-    #ranking-table th, #ranking-table td {
-      padding: 6px 0;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-    }
+    #ranking-table-wrap { margin-top: 10px; text-align: left; max-height: 38vh; overflow: auto; }
+    #ranking-table { width: 100%; border-collapse: collapse; font-size: 13px; color: #222; }
+    #ranking-table th, #ranking-table td { padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.08); }
     #ranking-table th:last-child, #ranking-table td:last-child { text-align: right; padding-right: 6px; }
 
-    .row-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
+    .row-buttons { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px; }
+    #retry-btn { width: 220px; padding: 12px 0; background: #00ffff; color: #003; box-shadow: 0 8px 18px rgba(0,255,255,0.25); }
+    #change-name-btn { width: 300px; padding: 12px 0; background: rgba(255,105,180,0.18); color:#550028; border:2px solid rgba(255,105,180,0.35); }
 
-    #retry-btn {
-      width: 220px;
-      padding: 12px 0;
-      background: #00ffff;
-      color: #003;
-      box-shadow: 0 8px 18px rgba(0,255,255,0.25);
-    }
+    #ranking-note { margin-top: 10px; font-size: 12px; color: rgba(0,0,0,0.55); font-weight: 800; }
 
-    #change-name-btn {
-      width: 260px;
-      padding: 12px 0;
-      background: rgba(255,105,180,0.18);
-      color: #550028;
-      border: 2px solid rgba(255,105,180,0.35);
-    }
-
-    #ranking-note {
-      margin-top: 10px;
-      font-size: 12px;
-      color: rgba(0,0,0,0.55);
-      font-weight: 800;
-    }
   </style>
 </head>
 
@@ -227,7 +146,7 @@
     </div>
   </div>
 
-  <!-- 開始画面（初回/名前変更時） -->
+  <!-- 開始 -->
   <div id="start-overlay">
     <div id="start-box">
       <h2>歯の防衛軍</h2>
@@ -239,7 +158,7 @@
     </div>
   </div>
 
-  <!-- 結果画面 -->
+  <!-- 結果 -->
   <div id="result-overlay" style="display:none;">
     <div id="result-box">
       <div id="result-title">スコアランキング</div>
@@ -270,7 +189,6 @@
     const enemyAsset  = 'https://lh3.googleusercontent.com/pw/AP1GczNJt7YEwIRTslg-7I4gO3tg_fC2ivisB2oqH_ft5-RMeT7vhwvVSENYrQtRrVmlmFbz5DTEpLtSEgnmedrN9pvfOObIff_BHA4JnA5XUvxCWOJa30ex625XCSNfzDcaJMqEyQBGG0fWi2jv63v_r_JI=w350-h362-s-no-gm';
     const bossAsset   = 'https://lh3.googleusercontent.com/pw/AP1GczMU093fP2J-3ZzNUZH79PVwl2HYqxMlnPCHTT6Qfd-8j9CnC9Cz2MJBttzK70lNc_dA_19XFP83LB7KjfxSMnZYkRBCosayb0JWO_nw1lkoGIvoLpv2dB7Yrrz6lq7jV1FPT_SkNjQXcNyFhqNQBzIC=w729-h911-s-no-gm';
 
-    // UI
     const startOverlay = document.getElementById('start-overlay');
     const nameInput = document.getElementById('name-input');
     const startBtn = document.getElementById('start-btn');
@@ -281,7 +199,6 @@
     const resultScoreEl = document.getElementById('result-score');
     const rankingTbody = document.getElementById('ranking-tbody');
 
-    // ゲームUI
     const scoreEl = document.getElementById('score');
     const timerEl = document.getElementById('timer');
     const playerEl = document.getElementById('player');
@@ -327,26 +244,13 @@
       bossHPContainer.style.display = 'none';
     }
 
-    async function endGame(name, score) {
-      // 1) スコア送信
-      try { await apiAddScore(name, score); } catch (err) { console.warn(err); }
-
-      // 2) ランキング取得
-      let top = [];
-      try {
-        const data = await apiGetTop();
-        top = data.top || [];
-      } catch (err) { console.warn(err); }
-
-      // 3) 表示
-      resultScoreEl.textContent = `今回のスコア：${score.toLocaleString()}`;
-      renderRanking(top);
-
-      resultOverlay.style.display = 'flex';
-      startOverlay.style.display = 'none';
-    }
+    // 重要：多重起動防止用のフラグ
+    let GAME_ID = 0;
 
     function startGameWithName(name) {
+      GAME_ID++;
+      const myId = GAME_ID;
+
       resetStage();
       resultOverlay.style.display = 'none';
       scoreEl.innerText = "SCORE: 0";
@@ -356,6 +260,7 @@
       let bossActive = false;
       let bossHP = 100;
 
+      let nextBossAt = 500; // ★500刻みで確実に出す
       const GAME_MS = 60 * 1000;
       const startTime = Date.now();
       timerEl.textContent = '60';
@@ -372,6 +277,7 @@
       const damageBoss = (amount) => {
         bossHP -= amount;
         bossHPBar.style.width = bossHP + '%';
+
         if (bossHP <= 0) {
           bossActive = false;
           bossHPContainer.style.display = 'none';
@@ -385,6 +291,7 @@
 
       const fireBeam = () => {
         if (charge < 100) return;
+
         charge = 0;
         if (chargeFill) chargeFill.style.width = '0%';
 
@@ -395,6 +302,8 @@
 
         let h = 0;
         const beamTimer = setInterval(() => {
+          if (GAME_ID !== myId) { clearInterval(beamTimer); return; }
+
           h += 60;
           beam.style.height = h + 'px';
 
@@ -411,7 +320,7 @@
             }
           }
 
-          // ボスダメージ（ビーム：強い）
+          // ボスダメージ（ビーム）
           if (bossActive) {
             const bElement = document.querySelector('.boss');
             if (bElement) {
@@ -441,8 +350,10 @@
         if (e.code === 'Space' || e.keyCode === 32) { e.preventDefault(); fireBeam(); }
       };
 
-      // 弾（💧）
+      // 弾
       const bulletInterval = setInterval(() => {
+        if (GAME_ID !== myId) return;
+
         let angles = score >= 3000 ? [-30, -15, 0, 15, 30] : [-15, 0, 15];
 
         angles.forEach(angle => {
@@ -498,11 +409,9 @@
         const stepY = 2;
 
         const bt = setInterval(() => {
-          if (!bossActive) {
-            clearInterval(bt);
-            boss.remove();
-            return;
-          }
+          if (GAME_ID !== myId) { clearInterval(bt); return; }
+          if (!bossActive) { clearInterval(bt); boss.remove(); return; }
+
           if (ty < 120) ty += stepY;
 
           tx += stepX * dir;
@@ -514,9 +423,11 @@
         }, 20);
       }
 
-      // ボス通常弾ダメージ（削りやすく）
+      // ボス通常弾ダメージ（倒しやすく：3）
       const bossDamageInterval = setInterval(() => {
+        if (GAME_ID !== myId) return;
         if (!bossActive) return;
+
         const bossEl = document.querySelector('.boss');
         if (!bossEl) return;
 
@@ -533,16 +444,17 @@
 
           if (dx < 70 && dy < 90) {
             b.remove();
-            damageBoss(2);
+            damageBoss(3);
             break;
           }
         }
       }, 80);
 
-      // 敵増やす（さらに短く：450ms -> 380ms）
-      const ENEMY_INTERVAL_MS = 380;
+      // 敵生成（さらに増やす：360ms相当）
+      const ENEMY_INTERVAL_MS = 360;
 
       const enemyInterval = setInterval(() => {
+        if (GAME_ID !== myId) return;
         if (bossActive) return;
 
         const enemy = document.createElement('div');
@@ -557,6 +469,8 @@
         let speed = 4 + Math.min(score / 1500, 8);
 
         const t = setInterval(() => {
+          if (GAME_ID !== myId) { clearInterval(t); return; }
+
           ePos += speed;
           enemy.style.top = ePos + 'px';
 
@@ -580,7 +494,12 @@
 
               setTimeout(() => enemy.remove(), 100);
 
-              if (score > 0 && score % 500 === 0) spawnBoss();
+              // ★確実にボス出現（次の閾値を超えたら）
+              if (score >= nextBossAt) {
+                nextBossAt += 500;
+                spawnBoss();
+              }
+
               clearInterval(t);
               return;
             }
@@ -594,6 +513,8 @@
       }, ENEMY_INTERVAL_MS);
 
       const timerTick = setInterval(async () => {
+        if (GAME_ID !== myId) return;
+
         const elapsed = Date.now() - startTime;
         const remain = Math.max(0, GAME_MS - elapsed);
         timerEl.textContent = String(Math.ceil(remain / 1000));
@@ -612,22 +533,50 @@
 
           scoreEl.innerText = "SCORE: " + score;
 
-          await endGame(name, score);
+          // ここから：まず結果画面を先に出してラグを短縮
+          resultScoreEl.textContent = `今回のスコア：${score.toLocaleString()}`;
+          renderRanking([]); // 一旦空
+          resultOverlay.style.display = 'flex';
+          startOverlay.style.display = 'none';
+
+          // 送信＆ランキング取得（遅くても画面は即出る）
+          try { await apiAddScore(name, score); } catch (err) { console.warn(err); }
+
+          try {
+            const data = await apiGetTop();
+            const top = data.top || [];
+            if (GAME_ID === myId) renderRanking(top);
+          } catch (err) {
+            console.warn(err);
+            if (GAME_ID === myId) renderRanking([]);
+          }
         }
       }, 100);
     }
 
-    // 初回/開始
+    function showStartWithOptionalName() {
+      resultOverlay.style.display = 'none';
+      startOverlay.style.display = 'flex';
+      const stored = localStorage.getItem('teeth_name') || '';
+      if (stored) nameInput.value = stored;
+      nameInput.focus();
+    }
+
+    // 初回UI
+    const storedName = localStorage.getItem('teeth_name');
+    if (storedName) {
+      // 入っているなら自動で値だけ入れる（開始はボタン）
+      nameInput.value = storedName;
+    }
+
     startBtn.addEventListener('click', () => {
       const name = (nameInput.value || '').trim() || '名無し';
       localStorage.setItem('teeth_name', name);
-
       startOverlay.style.display = 'none';
       resultOverlay.style.display = 'none';
       startGameWithName(name);
     });
 
-    // リトライ（名前省略）
     retryBtn.addEventListener('click', () => {
       const name = localStorage.getItem('teeth_name') || '名無し';
       resultOverlay.style.display = 'none';
@@ -635,16 +584,9 @@
       startGameWithName(name);
     });
 
-    // 名前変更してリトライ
     changeNameBtn.addEventListener('click', () => {
-      resultOverlay.style.display = 'none';
-      startOverlay.style.display = 'flex';
-      nameInput.focus();
+      showStartWithOptionalName();
     });
-
-    // すでに名前が入ってる場合：開始画面に自動入力だけしておく（任意）
-    const storedName = localStorage.getItem('teeth_name');
-    if (storedName) nameInput.value = storedName;
   </script>
 </body>
 </html>
