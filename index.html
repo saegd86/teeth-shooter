@@ -109,47 +109,29 @@
       display: block; user-select:none; pointer-events:none; -webkit-user-drag:none;
     }
 
-    #ranking {
-      position: fixed;
-      left: 12px;
-      bottom: 12px;
-      z-index: 200;
-      background: rgba(255,255,255,0.75);
-      color: #222;
-      border-radius: 12px;
-      padding: 10px 12px;
-      width: min(360px, 92vw);
-      max-height: 40vh;
-      overflow: auto;
-      display: none;
-      backdrop-filter: blur(6px);
-      font-weight: 900;
-      text-align: left;
-    }
-    #ranking h3 { margin: 0 0 8px 0; font-size: 14px; }
-    #ranking table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    #ranking th, #ranking td { padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.08); }
-    #ranking th:last-child, #ranking td:last-child { text-align: right; padding-right: 6px; }
-
-    #start-overlay {
+    /* 開始・結果オーバーレイ */
+    #start-overlay, #result-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.25);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 99999;
+      padding: 12px;
+      box-sizing: border-box;
     }
-    #start-box {
-      background: rgba(255,255,255,0.9);
+    #start-box, #result-box {
+      background: rgba(255,255,255,0.92);
       color: #1b1b1b;
       border-radius: 16px;
       padding: 18px 16px;
-      width: min(520px, 92vw);
+      width: min(560px, 94vw);
       text-align: center;
       box-shadow: 0 12px 32px rgba(0,0,0,0.25);
     }
     #start-box h2 { margin: 0 0 10px; }
     #start-box p { margin: 0 0 14px; font-weight: 800; }
+
     #name-input {
       width: 100%;
       max-width: 320px;
@@ -160,17 +142,72 @@
       font-size: 16px;
       font-weight: 800;
     }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 950;
+    }
     #start-btn {
       margin-top: 12px;
       width: 200px;
       padding: 12px 0;
-      border: none;
-      border-radius: 12px;
       background: #00ffff;
       color: #003;
-      font-weight: 950;
-      cursor: pointer;
       box-shadow: 0 8px 18px rgba(0,255,255,0.25);
+    }
+
+    #result-title { margin: 0 0 10px; font-size: 18px; font-weight: 1000; }
+    #result-score { margin: 0 0 10px; font-size: 16px; font-weight: 950; color: #d00000; }
+
+    #ranking-table-wrap {
+      margin-top: 10px;
+      text-align: left;
+      max-height: 38vh;
+      overflow: auto;
+    }
+    #ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      color: #222;
+    }
+    #ranking-table th, #ranking-table td {
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    #ranking-table th:last-child, #ranking-table td:last-child { text-align: right; padding-right: 6px; }
+
+    .row-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    #retry-btn {
+      width: 220px;
+      padding: 12px 0;
+      background: #00ffff;
+      color: #003;
+      box-shadow: 0 8px 18px rgba(0,255,255,0.25);
+    }
+
+    #change-name-btn {
+      width: 260px;
+      padding: 12px 0;
+      background: rgba(255,105,180,0.18);
+      color: #550028;
+      border: 2px solid rgba(255,105,180,0.35);
+    }
+
+    #ranking-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(0,0,0,0.55);
+      font-weight: 800;
     }
   </style>
 </head>
@@ -190,19 +227,39 @@
     </div>
   </div>
 
-  <div id="ranking">
-    <h3>スコアランキング（上位10）</h3>
-    <div id="ranking-body"></div>
-  </div>
-
+  <!-- 開始画面（初回/名前変更時） -->
   <div id="start-overlay">
     <div id="start-box">
       <h2>歯の防衛軍</h2>
       <p>名前を入力して、60秒勝負！</p>
-      <input id="name-input" maxlength="12" placeholder="例：さえ" />
+      <input id="name-input" maxlength="12" placeholder="例：がいどん" />
       <div>
-        <button id="start-btn" type="button">開始</button>
+        <button id="start-btn" class="btn" type="button">開始</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 結果画面 -->
+  <div id="result-overlay" style="display:none;">
+    <div id="result-box">
+      <div id="result-title">スコアランキング</div>
+      <div id="result-score"></div>
+
+      <div id="ranking-table-wrap">
+        <table id="ranking-table">
+          <thead>
+            <tr><th style="width:50px;">#</th><th>name</th><th style="width:110px; text-align:right;">score</th></tr>
+          </thead>
+          <tbody id="ranking-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="row-buttons">
+        <button id="retry-btn" class="btn" type="button">リトライ</button>
+        <button id="change-name-btn" class="btn" type="button">名前変更してリトライ</button>
+      </div>
+
+      <div id="ranking-note">※名前は前回入力したものを使用します</div>
     </div>
   </div>
 
@@ -213,21 +270,25 @@
     const enemyAsset  = 'https://lh3.googleusercontent.com/pw/AP1GczNJt7YEwIRTslg-7I4gO3tg_fC2ivisB2oqH_ft5-RMeT7vhwvVSENYrQtRrVmlmFbz5DTEpLtSEgnmedrN9pvfOObIff_BHA4JnA5XUvxCWOJa30ex625XCSNfzDcaJMqEyQBGG0fWi2jv63v_r_JI=w350-h362-s-no-gm';
     const bossAsset   = 'https://lh3.googleusercontent.com/pw/AP1GczMU093fP2J-3ZzNUZH79PVwl2HYqxMlnPCHTT6Qfd-8j9CnC9Cz2MJBttzK70lNc_dA_19XFP83LB7KjfxSMnZYkRBCosayb0JWO_nw1lkoGIvoLpv2dB7Yrrz6lq7jV1FPT_SkNjQXcNyFhqNQBzIC=w729-h911-s-no-gm';
 
+    // UI
     const startOverlay = document.getElementById('start-overlay');
     const nameInput = document.getElementById('name-input');
     const startBtn = document.getElementById('start-btn');
 
+    const resultOverlay = document.getElementById('result-overlay');
+    const retryBtn = document.getElementById('retry-btn');
+    const changeNameBtn = document.getElementById('change-name-btn');
+    const resultScoreEl = document.getElementById('result-score');
+    const rankingTbody = document.getElementById('ranking-tbody');
+
+    // ゲームUI
     const scoreEl = document.getElementById('score');
     const timerEl = document.getElementById('timer');
-
     const playerEl = document.getElementById('player');
     const container = document.getElementById('game-container');
     const chargeFill = document.getElementById('charge-fill');
     const bossHPBar = document.getElementById('boss-hp');
     const bossHPContainer = document.getElementById('boss-hp-container');
-
-    const rankingEl = document.getElementById('ranking');
-    const rankingBody = document.getElementById('ranking-body');
 
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, c => ({
@@ -252,28 +313,48 @@
         <tr>
           <td>${i + 1}</td>
           <td>${escapeHtml(r.name || '')}</td>
-          <td>${Number(r.score || 0).toLocaleString()}</td>
+          <td style="text-align:right; padding-right:6px;">${Number(r.score || 0).toLocaleString()}</td>
         </tr>
       `).join('');
+      rankingTbody.innerHTML = rows || `<tr><td colspan="3">まだデータなし</td></tr>`;
+    }
 
-      rankingBody.innerHTML = `
-        <table>
-          <thead>
-            <tr><th>#</th><th>name</th><th>score</th></tr>
-          </thead>
-          <tbody>${rows || '<tr><td colspan="3">まだデータなし</td></tr>'}</tbody>
-        </table>
-      `;
+    function resetStage() {
+      [...document.getElementsByClassName('enemy')].forEach(x => x.remove());
+      [...document.getElementsByClassName('bullet')].forEach(x => x.remove());
+      const b = document.querySelector('.boss');
+      if (b) b.remove();
+      bossHPContainer.style.display = 'none';
+    }
+
+    async function endGame(name, score) {
+      // 1) スコア送信
+      try { await apiAddScore(name, score); } catch (err) { console.warn(err); }
+
+      // 2) ランキング取得
+      let top = [];
+      try {
+        const data = await apiGetTop();
+        top = data.top || [];
+      } catch (err) { console.warn(err); }
+
+      // 3) 表示
+      resultScoreEl.textContent = `今回のスコア：${score.toLocaleString()}`;
+      renderRanking(top);
+
+      resultOverlay.style.display = 'flex';
+      startOverlay.style.display = 'none';
     }
 
     function startGameWithName(name) {
+      resetStage();
+      resultOverlay.style.display = 'none';
+      scoreEl.innerText = "SCORE: 0";
+
       let score = 0;
       let charge = 0;
       let bossActive = false;
       let bossHP = 100;
-
-      let enemyInterval = null;
-      let bulletInterval = null;
 
       const GAME_MS = 60 * 1000;
       const startTime = Date.now();
@@ -282,7 +363,6 @@
       playerEl.innerHTML = `<img src="${playerAsset}" alt="player">`;
 
       let playerX = window.innerWidth / 2;
-
       const updatePos = (x) => {
         playerX = Math.max(25, Math.min(x, window.innerWidth - 25));
         playerEl.style.left = playerX + 'px';
@@ -292,15 +372,14 @@
       const damageBoss = (amount) => {
         bossHP -= amount;
         bossHPBar.style.width = bossHP + '%';
-
         if (bossHP <= 0) {
           bossActive = false;
           bossHPContainer.style.display = 'none';
           score += 1000;
           scoreEl.innerText = "SCORE: " + score;
 
-          const b = document.querySelector('.boss');
-          if (b) { b.innerHTML = '✨💥✨'; setTimeout(() => b.remove(), 500); }
+          const bEl = document.querySelector('.boss');
+          if (bEl) { bEl.innerHTML = '✨💥✨'; setTimeout(() => bEl.remove(), 500); }
         }
       };
 
@@ -363,7 +442,7 @@
       };
 
       // 弾（💧）
-      bulletInterval = setInterval(() => {
+      const bulletInterval = setInterval(() => {
         let angles = score >= 3000 ? [-30, -15, 0, 15, 30] : [-15, 0, 15];
 
         angles.forEach(angle => {
@@ -424,7 +503,6 @@
             boss.remove();
             return;
           }
-
           if (ty < 120) ty += stepY;
 
           tx += stepX * dir;
@@ -436,17 +514,15 @@
         }, 20);
       }
 
-      // ボス通常弾ダメージ（必殺技じゃないと削れない問題を解消）
+      // ボス通常弾ダメージ（削りやすく）
       const bossDamageInterval = setInterval(() => {
         if (!bossActive) return;
-
         const bossEl = document.querySelector('.boss');
         if (!bossEl) return;
 
         const bossCenterX = parseInt(bossEl.style.left) + 165;
         const bossCenterY = parseInt(bossEl.style.top) + 165;
 
-        // ボスへ当たった💧を少しずつ削る
         const bullets = document.getElementsByClassName('bullet');
         for (let b of bullets) {
           const bulletLeft = parseInt(b.style.left);
@@ -455,17 +531,18 @@
           const dx = Math.abs(bulletLeft + 12 - bossCenterX);
           const dy = Math.abs(bulletTop - bossCenterY);
 
-          // 当たり判定（ビームより弱くてOK）
           if (dx < 70 && dy < 90) {
             b.remove();
-            damageBoss(2); // 通常は弱め
-            break; // 連打しすぎ防止
+            damageBoss(2);
+            break;
           }
         }
       }, 80);
 
-      // 敵生成（さらに増やす：520ms -> 450ms）
-      enemyInterval = setInterval(() => {
+      // 敵増やす（さらに短く：450ms -> 380ms）
+      const ENEMY_INTERVAL_MS = 380;
+
+      const enemyInterval = setInterval(() => {
         if (bossActive) return;
 
         const enemy = document.createElement('div');
@@ -483,7 +560,6 @@
           ePos += speed;
           enemy.style.top = ePos + 'px';
 
-          // 通常弾で敵を撃破
           const bullets = document.getElementsByClassName('bullet');
           for (let b of bullets) {
             if (enemy.dataset.state !== 'alive') continue;
@@ -497,13 +573,6 @@
             if (Math.abs(bulletLeft + 12 - enemyLeft) < 30 && Math.abs(bulletTop - enemyTop) < 35) {
               enemy.dataset.state = 'dead';
               enemy.innerHTML = '✨';
-
-              const msg = document.createElement('div');
-              const msgs = ['バイバイ菌！', 'ナイス！', 'スッキリ！', '滅菌！'];
-              msg.innerText = msgs[Math.floor(Math.random() * msgs.length)];
-              msg.style.cssText = `position:absolute; left:${enemy.style.left}; top:${enemy.style.top}; color:#ff00ff; font-weight:bold; font-size:18px; z-index:50; pointer-events:none;`;
-              container.appendChild(msg);
-              setTimeout(() => msg.remove(), 500);
 
               b.remove();
               score += 10;
@@ -522,49 +591,60 @@
             enemy.remove();
           }
         }, 20);
-      }, 450);
+      }, ENEMY_INTERVAL_MS);
 
-      const endGame = async () => {
-        clearInterval(enemyInterval);
-        clearInterval(bulletInterval);
-        clearInterval(bossDamageInterval);
-
-        [...document.getElementsByClassName('enemy')].forEach(x => x.remove());
-        [...document.getElementsByClassName('bullet')].forEach(x => x.remove());
-        const b = document.querySelector('.boss');
-        if (b) b.remove();
-
-        scoreEl.innerText = "SCORE: " + score;
-
-        try { await apiAddScore(name, score); } catch (err) { console.warn(err); }
-
-        try {
-          const data = await apiGetTop();
-          renderRanking(data.top || []);
-          rankingEl.style.display = 'block';
-        } catch (err) { console.warn(err); }
-
-        startOverlay.style.display = 'flex';
-      };
-
-      const timerTick = setInterval(() => {
+      const timerTick = setInterval(async () => {
         const elapsed = Date.now() - startTime;
         const remain = Math.max(0, GAME_MS - elapsed);
-        const sec = Math.ceil(remain / 1000);
-        timerEl.textContent = String(sec);
+        timerEl.textContent = String(Math.ceil(remain / 1000));
+
         if (remain <= 0) {
           clearInterval(timerTick);
-          endGame();
+          clearInterval(enemyInterval);
+          clearInterval(bulletInterval);
+          clearInterval(bossDamageInterval);
+
+          [...document.getElementsByClassName('enemy')].forEach(x => x.remove());
+          [...document.getElementsByClassName('bullet')].forEach(x => x.remove());
+          const b = document.querySelector('.boss');
+          if (b) b.remove();
+          bossHPContainer.style.display = 'none';
+
+          scoreEl.innerText = "SCORE: " + score;
+
+          await endGame(name, score);
         }
       }, 100);
     }
 
+    // 初回/開始
     startBtn.addEventListener('click', () => {
       const name = (nameInput.value || '').trim() || '名無し';
+      localStorage.setItem('teeth_name', name);
+
       startOverlay.style.display = 'none';
-      rankingEl.style.display = 'none';
+      resultOverlay.style.display = 'none';
       startGameWithName(name);
     });
+
+    // リトライ（名前省略）
+    retryBtn.addEventListener('click', () => {
+      const name = localStorage.getItem('teeth_name') || '名無し';
+      resultOverlay.style.display = 'none';
+      startOverlay.style.display = 'none';
+      startGameWithName(name);
+    });
+
+    // 名前変更してリトライ
+    changeNameBtn.addEventListener('click', () => {
+      resultOverlay.style.display = 'none';
+      startOverlay.style.display = 'flex';
+      nameInput.focus();
+    });
+
+    // すでに名前が入ってる場合：開始画面に自動入力だけしておく（任意）
+    const storedName = localStorage.getItem('teeth_name');
+    if (storedName) nameInput.value = storedName;
   </script>
 </body>
 </html>
