@@ -185,13 +185,28 @@
     }
 
     function renderRanking(top, targetTbody) {
-      const rows = (top || []).map((r, i) => `
+      // 1. 重複する名前を省き、最高スコア（最初に出現したデータ）のみを残す
+      const uniqueData = [];
+      const seenNames = new Set();
+
+      (top || []).forEach(record => {
+        const name = record.name || '';
+        // まだこの名前がリストに追加されていなければ追加する
+        if (!seenNames.has(name)) {
+          seenNames.add(name);
+          uniqueData.push(record);
+        }
+      });
+
+      // 2. 重複を省いたデータ（uniqueData）を使って表を作る
+      const rows = uniqueData.map((r, i) => `
         <tr>
           <td>${i + 1}</td>
           <td>${escapeHtml(r.name || '')}</td>
           <td style="text-align:right; padding-right:6px;">${Number(r.score || 0).toLocaleString()}</td>
         </tr>
       `).join('');
+      
       targetTbody.innerHTML = rows || `<tr><td colspan="3">まだデータなし</td></tr>`;
     }
 
