@@ -33,8 +33,12 @@
     #start-box p { margin: 0 0 14px; font-weight: 800; }
 
     #name-input { width: 100%; max-width: 320px; padding: 12px 12px; border-radius: 12px; border: 2px solid rgba(255,105,180,0.6); outline: none; font-size: 16px; font-weight: 800; }
-    .btn { border: none; border-radius: 12px; cursor: pointer; font-weight: 950; }
-    #start-btn { margin-top: 12px; width: 200px; padding: 12px 0; background: #00ffff; color: #003; box-shadow: 0 8px 18px rgba(0,255,255,0.25); }
+    .btn { border: none; border-radius: 12px; cursor: pointer; font-weight: 950; font-size: 14px; }
+    
+    /* TOP画面のボタン並び用 */
+    .start-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
+    #start-btn { width: 150px; padding: 12px 0; background: #00ffff; color: #003; box-shadow: 0 8px 18px rgba(0,255,255,0.25); }
+    #view-ranking-btn { width: 150px; padding: 12px 0; background: rgba(255,105,180,0.18); color: #550028; border: 2px solid rgba(255,105,180,0.35); }
 
     #result-title { margin: 0 0 10px; font-size: 18px; font-weight: 1000; }
     #result-score { margin: 0 0 10px; font-size: 16px; font-weight: 950; color: #d00000; }
@@ -50,6 +54,11 @@
 
     #ranking-note { margin-top: 10px; font-size: 12px; color: rgba(0,0,0,0.55); font-weight: 800; }
     #loading-ranking { margin-top: 10px; font-weight: 1000; color: rgba(0,0,0,0.55); display:none; }
+    
+    /* TOP画面のランキング確認用モーダル */
+    #top-ranking-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100000; padding: 12px; box-sizing: border-box; }
+    #top-ranking-box { background: rgba(255,255,255,0.95); color: #1b1b1b; border-radius: 16px; padding: 20px 16px; width: min(560px, 94vw); text-align: center; box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+    #close-ranking-btn { margin-top: 15px; width: 180px; padding: 12px 0; background: #ddd; color: #333; }
   </style>
 </head>
 
@@ -68,17 +77,37 @@
     </div>
   </div>
 
+  <!-- 開始画面 -->
   <div id="start-overlay">
     <div id="start-box">
       <h2>歯の防衛軍</h2>
       <p>名前を入力して、60秒勝負！</p>
       <input id="name-input" maxlength="12" placeholder="例：がいどん" />
-      <div>
+      <div class="start-buttons">
         <button id="start-btn" class="btn" type="button">開始</button>
+        <button id="view-ranking-btn" class="btn" type="button">ランキングを見る</button>
       </div>
     </div>
   </div>
 
+  <!-- TOP画面から見るランキングモーダル -->
+  <div id="top-ranking-overlay">
+    <div id="top-ranking-box">
+      <div id="result-title">現在のランキング</div>
+      <div id="ranking-table-wrap">
+        <table id="ranking-table">
+          <thead>
+            <tr><th style="width:50px;">#</th><th>name</th><th style="width:110px; text-align:right;">score</th></tr>
+          </thead>
+          <tbody id="top-ranking-tbody"></tbody>
+        </table>
+      </div>
+      <div id="top-loading-ranking" style="margin-top: 10px; font-weight: 1000; color: rgba(0,0,0,0.55); display:none;">ランキング取得中…</div>
+      <button id="close-ranking-btn" class="btn" type="button">閉じる</button>
+    </div>
+  </div>
+
+  <!-- リザルト画面 -->
   <div id="result-overlay" style="display:none;">
     <div id="result-box">
       <div id="result-title">スコアランキング</div>
@@ -114,6 +143,13 @@
     const startOverlay = document.getElementById('start-overlay');
     const nameInput = document.getElementById('name-input');
     const startBtn = document.getElementById('start-btn');
+    const viewRankingBtn = document.getElementById('view-ranking-btn'); // 追加
+
+    // TOPランキングモーダル用 追加
+    const topRankingOverlay = document.getElementById('top-ranking-overlay');
+    const closeRankingBtn = document.getElementById('close-ranking-btn');
+    const topRankingTbody = document.getElementById('top-ranking-tbody');
+    const topLoadingRanking = document.getElementById('top-loading-ranking');
 
     const resultOverlay = document.getElementById('result-overlay');
     const retryBtn = document.getElementById('retry-btn');
@@ -148,15 +184,30 @@
       return res.json();
     }
 
-    function renderRanking(top) {
-      const rows = (top || []).map((r, i) => `
+    function renderRanking(top, targetTbody) {
+      // 1. 重複する名前を省き、最高スコア（最初に出現したデータ）のみを残す
+      const uniqueData = [];
+      const seenNames = new Set();
+
+      (top || []).forEach(record => {
+        const name = record.name || '';
+        // まだこの名前がリストに追加されていなければ追加する
+        if (!seenNames.has(name)) {
+          seenNames.add(name);
+          uniqueData.push(record);
+        }
+      });
+
+      // 2. 重複を省いたデータ（uniqueData）を使って表を作る
+      const rows = uniqueData.map((r, i) => `
         <tr>
           <td>${i + 1}</td>
           <td>${escapeHtml(r.name || '')}</td>
           <td style="text-align:right; padding-right:6px;">${Number(r.score || 0).toLocaleString()}</td>
         </tr>
       `).join('');
-      rankingTbody.innerHTML = rows || `<tr><td colspan="3">まだデータなし</td></tr>`;
+      
+      targetTbody.innerHTML = rows || `<tr><td colspan="3">まだデータなし</td></tr>`;
     }
 
     function resetStage() {
@@ -270,7 +321,6 @@
       const bulletInterval = setInterval(() => {
         if (GAME_ID !== myId) return;
 
-        // 💧 1本だけ：-10/0/10からランダム
         let angles = [ [-8, 0, 8][Math.floor(Math.random() * 3)] ];
 
         angles.forEach(angle => {
@@ -300,7 +350,6 @@
       }, 220);
 
       function spawnBoss() {
-        // ★ボス渋滞完全抑止：すでにボスDOMがあるなら絶対出さない
         if (document.querySelector('.boss')) return;
         bossActive = true;
         bossHP = 100;
@@ -410,7 +459,6 @@
 
               setTimeout(() => enemy.remove(), 100);
 
-              // ★ボス閾値：whileやめて「ちょうど/超えたら次へ1回だけ」
               if (score >= nextBossAt) {
                 nextBossAt += 500;
                 if (!document.querySelector('.boss')) spawnBoss();
@@ -461,11 +509,11 @@
           try {
             const data = await apiGetTop();
             if (GAME_ID !== myId) return;
-            renderRanking(data.top || []);
+            renderRanking(data.top || [], rankingTbody);
           } catch (err) {
             console.warn(err);
             if (GAME_ID !== myId) return;
-            renderRanking([]);
+            renderRanking([], rankingTbody);
           } finally {
             if (GAME_ID === myId) loadingRankingEl.style.display = 'none';
           }
@@ -482,6 +530,28 @@
     }
 
     showStart();
+
+    // ＝＝＝＝ ここから TOP画面のランキングボタン処理 ＝＝＝＝
+    viewRankingBtn.addEventListener('click', async () => {
+      topRankingOverlay.style.display = 'flex'; // モーダル表示
+      topRankingTbody.innerHTML = '';
+      topLoadingRanking.style.display = 'block';
+      
+      try {
+        const data = await apiGetTop();
+        renderRanking(data.top || [], topRankingTbody);
+      } catch (err) {
+        console.warn(err);
+        topRankingTbody.innerHTML = `<tr><td colspan="3">取得エラー</td></tr>`;
+      } finally {
+        topLoadingRanking.style.display = 'none';
+      }
+    });
+
+    closeRankingBtn.addEventListener('click', () => {
+      topRankingOverlay.style.display = 'none'; // モーダル非表示
+    });
+    // ＝＝＝＝ ここまで ＝＝＝＝
 
     startBtn.addEventListener('click', () => {
       const name = (nameInput.value || '').trim() || '名無し';
