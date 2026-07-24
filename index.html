@@ -73,9 +73,10 @@
 
     <div id="boss-hp-container"><div id="boss-hp"></div></div>
 
-    <div id="charge-container">
+   <div id="charge-container">
       <div id="charge-frame"><div id="charge-fill"></div></div>
-      <div id="beam-charge-text">必殺技：右クリック / 長押し</div>
+      <!-- 中の文字を消して空っぽにしておく -->
+      <div id="beam-charge-text"></div>
     </div>
   </div>
 
@@ -544,7 +545,7 @@
         renderRanking(data.top || [], topRankingTbody);
       } catch (err) {
         console.warn(err);
-        topRankingTbody.innerHTML = `<tr><td colspan="3">取得エラー</td></tr>`;
+        topRankingTbody.innerHTML = `<tr><td colspan="3">取得エラー リトライしてください</td></tr>`;
       } finally {
         topLoadingRanking.style.display = 'none';
       }
@@ -571,6 +572,18 @@
     });
 
     changeNameBtn.addEventListener('click', () => showStart());
+
+    // PCかスマホか判定して必殺技の文字を変える
+    const beamChargeText = document.getElementById('beam-charge-text');
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      beamChargeText.innerText = '必殺技：画面を長押し';
+    } else {
+      beamChargeText.innerText = '必殺技：右クリック';
+    }
+
+  </script>
+</body>
+</html>
   </script>
 </body>
 </html>
