@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>歯の防衛軍 - ランキング</title>
+  <title>歯の防衛軍</title>
   <link rel="icon" href="icon.png?v=2">
   <link rel="apple-touch-icon" href="icon.png?v=2">
   <style>
     body { background: #222; color: white; text-align: center; overflow: hidden; margin: 0; font-family: sans-serif; }
     #game-container { position: relative; width: 100vw; height: 100vh; background: radial-gradient(circle, #ffc0cb, #ffb6c1); margin: 0 auto; border-bottom: 8px solid #ff69b4; overflow: hidden; touch-action: none; cursor: crosshair; }
-    #score { position: absolute; top: 20px; left: 20px; color: #d00000; font-size: 32px; font-weight: bold; z-index: 100; text-shadow: 2px 2px 0px white; }
-    #timer { position: absolute; top: 20px; right: 20px; font-weight: 900; font-size: 26px; color: #0066ff; text-shadow: 1px 1px 0 rgba(255,255,255,0.7); z-index: 100; }
+    #score { position: absolute; top: 20px; left: 20px; color: #d00000; font-size: 32px; font-weight: bold; z-index: 100; text-shadow: 2px 2px 0px white; user-select: none; -webkit-user-select: none; pointer-events: none; }
+    #timer { position: absolute; top: 20px; right: 20px; font-weight: 900; font-size: 26px; color: #0066ff; text-shadow: 1px 1px 0 rgba(255,255,255,0.7); z-index: 100; user-select: none; -webkit-user-select: none; pointer-events: none; }
     #player { position: absolute; bottom: 90px; left: 50%; z-index: 10; transition: 0.05s; transform: translateX(-50%); }
     #player img { width: 140px; height: 140px; object-fit: contain; display: block; user-select:none; pointer-events:none; -webkit-user-drag:none; }
     .enemy { position: absolute; z-index: 5; text-align: center; }
@@ -89,7 +89,7 @@
     <div id="start-box">
       <h2>歯の防衛軍</h2>
       <p>名前を入力して、モードを選択！</p>
-      <input id="name-input" maxlength="12" placeholder="例：がいどん" />
+      <input id="name-input" maxlength="20" placeholder="例：がいどん" />
       <div class="start-buttons">
         <button id="start-60-btn" class="btn" type="button">60秒スタート</button>
         <button id="start-30-btn" class="btn" type="button">30秒(運ゲー)</button>
