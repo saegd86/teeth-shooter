@@ -456,9 +456,9 @@
         let ePos = -50;
         let speed = 4.7 + Math.min(score / 1300, 9);
         
-        // 【変更後】通常は2.5倍、金の歯は3.5倍のスピード
-        if (mode === '30') speed *= 2.5;
-        if (isGolden) speed *= 3.5;
+        // 【変更後】通常は2.0倍、金の歯は2.5倍のスピード
+        if (mode === '30') speed *= 2.0;
+        if (isGolden) speed *= 2.5;
 
         const t = setInterval(() => {
           if (GAME_ID !== myId) { clearInterval(t); return; }
