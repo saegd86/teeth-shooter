@@ -150,6 +150,7 @@
     const playerAsset = 'player.png';
     const enemyAsset  = 'enemy.png';
     const bossAsset   = 'boss.png';
+    const goldenAsset = 'golden.png';
 
     const startOverlay = document.getElementById('start-overlay');
     const nameInput = document.getElementById('name-input');
@@ -438,9 +439,9 @@
         enemy.dataset.state = 'alive';
         enemy.dataset.type = isGolden ? 'golden' : 'normal';
 
-        if (isGolden) {
-          enemy.innerHTML = '✨🦷✨'; 
-          enemy.style.fontSize = '35px';
+       if (isGolden) {
+          enemy.innerHTML = `<img src="${goldenAsset}" alt="golden">`;
+          // 画像の周りがボワッと光るエフェクトは残しています！不要なら消してOKです
           enemy.style.filter = 'drop-shadow(0 0 10px gold)';
         } else {
           enemy.innerHTML = `<img src="${enemyAsset}" alt="enemy">`;
@@ -471,7 +472,7 @@
             const enemyLeft = parseInt(enemy.style.left) + (isGolden ? 15 : 25);
             const enemyTop = parseInt(enemy.style.top) + 25;
 
-            if (Math.abs(bulletLeft + 12 - enemyLeft) < 30 && Math.abs(bulletTop - enemyTop) < 35) {
+              if (Math.abs(bulletLeft + 12 - enemyLeft) < 40 && Math.abs(bulletTop - enemyTop) < 60) {
               enemy.dataset.state = 'dead';
               enemy.innerHTML = '✨';
               b.remove();
