@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>歯の防衛軍 - ランキング</title>
+  <link rel="icon" href="icon.png?v=2">
+  <link rel="apple-touch-icon" href="icon.png?v=2">
   <style>
     body { background: #222; color: white; text-align: center; overflow: hidden; margin: 0; font-family: sans-serif; }
     #game-container { position: relative; width: 100vw; height: 100vh; background: radial-gradient(circle, #ffc0cb, #ffb6c1); margin: 0 auto; border-bottom: 8px solid #ff69b4; overflow: hidden; touch-action: none; cursor: crosshair; }
@@ -11,7 +13,7 @@
     #timer { position: absolute; top: 20px; right: 20px; font-weight: 900; font-size: 26px; color: #0066ff; text-shadow: 1px 1px 0 rgba(255,255,255,0.7); z-index: 100; }
     #player { position: absolute; bottom: 90px; left: 50%; z-index: 10; transition: 0.05s; transform: translateX(-50%); }
     #player img { width: 140px; height: 140px; object-fit: contain; display: block; user-select:none; pointer-events:none; -webkit-user-drag:none; }
-    .enemy { position: absolute; z-index: 5; }
+    .enemy { position: absolute; z-index: 5; text-align: center; }
     .enemy img { width: 50px; height: 50px; object-fit: contain; display: block; user-select:none; pointer-events:none; -webkit-user-drag:none; }
     .bullet { position: absolute; font-size: 25px; z-index: 4; pointer-events:none; user-select:none; }
     .beam { position: absolute; bottom: 100px; width: 50px; background: rgba(0, 255, 255, 0.7); box-shadow: 0 0 20px #00ffff; transform: translateX(-50%); z-index: 3; }
@@ -33,14 +35,19 @@
     #start-box p { margin: 0 0 14px; font-weight: 800; }
 
     #name-input { width: 100%; max-width: 320px; padding: 12px 12px; border-radius: 12px; border: 2px solid rgba(255,105,180,0.6); outline: none; font-size: 16px; font-weight: 800; }
+    
     .btn { border: none; border-radius: 12px; cursor: pointer; font-weight: 950; font-size: 14px; }
     
-    /* TOP画面のボタン並び用 */
-    .start-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
-    #start-btn { width: 150px; padding: 12px 0; background: #00ffff; color: #003; box-shadow: 0 8px 18px rgba(0,255,255,0.25); }
-    #view-ranking-btn { width: 150px; padding: 12px 0; background: rgba(255,105,180,0.18); color: #550028; border: 2px solid rgba(255,105,180,0.35); }
+    /* TOP画面のボタン並び用（2x2のグリッド風に調整） */
+    .start-buttons { display: flex; gap: 8px; justify-content: center; margin-top: 15px; flex-wrap: wrap; max-width: 320px; margin-left: auto; margin-right: auto; }
+    #start-60-btn, #start-30-btn { width: 48%; padding: 12px 0; }
+    #start-60-btn { background: #00ffff; color: #003; box-shadow: 0 6px 14px rgba(0,255,255,0.25); }
+    #start-30-btn { background: #ffd700; color: #330; box-shadow: 0 6px 14px rgba(255,215,0,0.4); }
+    
+    .ranking-btns { width: 100%; display: flex; gap: 8px; justify-content: center; margin-top: 4px; }
+    .view-ranking-btn { width: 48%; padding: 10px 0; font-size: 12px; background: rgba(255,105,180,0.15); color: #550028; border: 2px solid rgba(255,105,180,0.35); }
 
-    #result-title { margin: 0 0 10px; font-size: 18px; font-weight: 1000; }
+    .result-title-class { margin: 0 0 10px; font-size: 18px; font-weight: 1000; }
     #result-score { margin: 0 0 10px; font-size: 16px; font-weight: 950; color: #d00000; }
 
     #ranking-table-wrap { margin-top: 10px; text-align: left; max-height: 38vh; overflow: auto; }
@@ -73,7 +80,7 @@
 
     <div id="charge-container">
       <div id="charge-frame"><div id="charge-fill"></div></div>
-      <div id="beam-charge-text">必殺技：右クリック / 長押し</div>
+      <div id="beam-charge-text"></div>
     </div>
   </div>
 
@@ -81,11 +88,15 @@
   <div id="start-overlay">
     <div id="start-box">
       <h2>歯の防衛軍</h2>
-      <p>名前を入力して、60秒勝負！</p>
+      <p>名前を入力して、モードを選択！</p>
       <input id="name-input" maxlength="12" placeholder="例：がいどん" />
       <div class="start-buttons">
-        <button id="start-btn" class="btn" type="button">開始</button>
-        <button id="view-ranking-btn" class="btn" type="button">ランキングを見る</button>
+        <button id="start-60-btn" class="btn" type="button">60秒スタート</button>
+        <button id="start-30-btn" class="btn" type="button">30秒(運ゲー)</button>
+        <div class="ranking-btns">
+          <button id="view-rank-60-btn" class="btn view-ranking-btn" type="button">60秒ランキング</button>
+          <button id="view-rank-30-btn" class="btn view-ranking-btn" type="button">30秒ランキング</button>
+        </div>
       </div>
     </div>
   </div>
@@ -93,7 +104,7 @@
   <!-- TOP画面から見るランキングモーダル -->
   <div id="top-ranking-overlay">
     <div id="top-ranking-box">
-      <div id="result-title">現在のランキング</div>
+      <div id="top-result-title" class="result-title-class">現在のランキング</div>
       <div id="ranking-table-wrap">
         <table id="ranking-table">
           <thead>
@@ -110,7 +121,7 @@
   <!-- リザルト画面 -->
   <div id="result-overlay" style="display:none;">
     <div id="result-box">
-      <div id="result-title">スコアランキング</div>
+      <div id="end-result-title" class="result-title-class">スコアランキング</div>
       <div id="result-score"></div>
 
       <div id="ranking-table-wrap">
@@ -126,7 +137,7 @@
 
       <div class="row-buttons">
         <button id="retry-btn" class="btn" type="button">リトライ</button>
-        <button id="change-name-btn" class="btn" type="button">名前変更してリトライ</button>
+        <button id="change-name-btn" class="btn" type="button">名前変更して戻る</button>
       </div>
 
       <div id="ranking-note">※名前は前回入力したものを使用します</div>
@@ -136,20 +147,23 @@
   <script>
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzHV87PFFH2r9JYBpsAR8Yp0PDiGnyKMM3I9CtVQaIYELsTh-yS8MtOvHmduTX27Rmg/exec';
 
-    const playerAsset = 'https://lh3.googleusercontent.com/pw/AP1GczPPUkdPu1gSfXNsbBdZBNXv1AlPzWVFMrjIdTXKRw-f5DgveIpwMY-ABgIo2js4Us1s3CPaBYax_-a9jenFxFJY025Rqvjqv2vtOS-wxE8s34onCfj_kpuONJlDvaDrf1h9H6q_sqphX6s3WTWOVrRD=w729-h911-s-no-gm';
-    const enemyAsset  = 'https://lh3.googleusercontent.com/pw/AP1GczNJt7YEwIRTslg-7I4gO3tg_fC2ivisB2oqH_ft5-RMeT7vhwvVSENYrQtRrVmlmFbz5DTEpLtSEgnmedrN9pvfOObIff_BHA4JnA5XUvxCWOJa30ex625XCSNfzDcaJMqEyQBGG0fWi2jv63v_r_JI=w350-h362-s-no-gm';
-    const bossAsset   = 'https://lh3.googleusercontent.com/pw/AP1GczMU093fP2J-3ZzNUZH79PVwl2HYqxMlnPCHTT6Qfd-8j9CnC9Cz2MJBttzK70lNc_dA_19XFP83LB7KjfxSMnZYkRBCosayb0JWO_nw1lkoGIvoLpv2dB7Yrrz6lq7jV1FPT_SkNjQXcNyFhqNQBzIC=w729-h911-s-no-gm';
+    const playerAsset = 'player.png';
+    const enemyAsset  = 'enemy.png';
+    const bossAsset   = 'boss.png';
 
     const startOverlay = document.getElementById('start-overlay');
     const nameInput = document.getElementById('name-input');
-    const startBtn = document.getElementById('start-btn');
-    const viewRankingBtn = document.getElementById('view-ranking-btn'); // 追加
+    const start60Btn = document.getElementById('start-60-btn');
+    const start30Btn = document.getElementById('start-30-btn');
+    const viewRank60Btn = document.getElementById('view-rank-60-btn');
+    const viewRank30Btn = document.getElementById('view-rank-30-btn');
 
-    // TOPランキングモーダル用 追加
     const topRankingOverlay = document.getElementById('top-ranking-overlay');
     const closeRankingBtn = document.getElementById('close-ranking-btn');
     const topRankingTbody = document.getElementById('top-ranking-tbody');
     const topLoadingRanking = document.getElementById('top-loading-ranking');
+    const topResultTitle = document.getElementById('top-result-title');
+    const endResultTitle = document.getElementById('end-result-title');
 
     const resultOverlay = document.getElementById('result-overlay');
     const retryBtn = document.getElementById('retry-btn');
@@ -166,47 +180,49 @@
     const bossHPBar = document.getElementById('boss-hp');
     const bossHPContainer = document.getElementById('boss-hp-container');
 
+    let currentMode = '60'; 
+
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, c => ({
         '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
       }[c]));
     }
 
-    async function apiAddScore(name, score) {
-      const url = GAS_URL + '?action=add&name=' + encodeURIComponent(name) + '&score=' + encodeURIComponent(score);
+    // modeパラメータを追加
+    async function apiAddScore(name, score, mode) {
+      const url = GAS_URL + '?action=add&name=' + encodeURIComponent(name) + '&score=' + encodeURIComponent(score) + '&mode=' + encodeURIComponent(mode);
       const res = await fetch(url, { method: 'POST' });
       return res.json().catch(() => ({}));
     }
 
-    async function apiGetTop() {
-      const url = GAS_URL + '?action=list';
+    // modeパラメータを追加
+    async function apiGetTop(mode) {
+      const url = GAS_URL + '?action=list&mode=' + encodeURIComponent(mode);
       const res = await fetch(url, { method: 'GET' });
       return res.json();
     }
 
     function renderRanking(top, targetTbody) {
-      // 1. 重複する名前を省き、最高スコア（最初に出現したデータ）のみを残す
       const uniqueData = [];
       const seenNames = new Set();
 
       (top || []).forEach(record => {
         const name = record.name || '';
-        // まだこの名前がリストに追加されていなければ追加する
         if (!seenNames.has(name)) {
           seenNames.add(name);
           uniqueData.push(record);
         }
       });
 
-      // 2. 重複を省いたデータ（uniqueData）を使って表を作る
-      const rows = uniqueData.map((r, i) => `
+      const top10Data = uniqueData.slice(0, 10);
+
+      const rows = top10Data.map((r, i) => `
         <tr>
           <td>${i + 1}</td>
           <td>${escapeHtml(r.name || '')}</td>
           <td style="text-align:right; padding-right:6px;">${Number(r.score || 0).toLocaleString()}</td>
         </tr>
       `).join('');
-      
       targetTbody.innerHTML = rows || `<tr><td colspan="3">まだデータなし</td></tr>`;
     }
 
@@ -220,7 +236,7 @@
 
     let GAME_ID = 0;
 
-    function startGameWithName(name) {
+    function startGameWithName(name, mode) {
       GAME_ID++;
       const myId = GAME_ID;
 
@@ -234,9 +250,9 @@
       let bossHP = 100;
 
       let nextBossAt = 1100;
-      const GAME_MS = 60 * 1000;
+      const GAME_MS = mode === '30' ? 30 * 1000 : 60 * 1000;
       const startTime = Date.now();
-      timerEl.textContent = '60';
+      timerEl.textContent = mode === '30' ? '30' : '60';
 
       playerEl.innerHTML = `<img src="${playerAsset}" alt="player">`;
 
@@ -283,7 +299,8 @@
             if (e.dataset.state !== 'alive') continue;
             if (Math.abs(parseInt(e.style.left) - (playerX - 25)) < 70) {
               e.dataset.state = 'dead';
-              score += 20;
+              const addScore = e.dataset.type === 'golden' ? 500 : 20;
+              score += addScore;
               scoreEl.innerText = "SCORE: " + score;
               e.innerHTML = '✨';
               setTimeout(() => e.remove(), 100);
@@ -370,7 +387,6 @@
         let ty = -180;
         let tx = startX;
         let dir = 1;
-
         const leftBound = -260;
         const rightBound = window.innerWidth - bossSize + 260;
         const stepX = 3;
@@ -379,33 +395,26 @@
         const bt = setInterval(() => {
           if (GAME_ID !== myId) { clearInterval(bt); return; }
           if (!bossActive) { clearInterval(bt); boss.remove(); return; }
-
           if (ty < 120) ty += stepY;
-
           tx += stepX * dir;
           if (tx > rightBound) { tx = rightBound; dir = -1; }
           if (tx < leftBound) { tx = leftBound; dir = 1; }
-
           boss.style.top = ty + 'px';
           boss.style.left = tx + 'px';
         }, 20);
       }
 
       const bossDamageInterval = setInterval(() => {
-        if (GAME_ID !== myId) return;
-        if (!bossActive) return;
-
+        if (GAME_ID !== myId || !bossActive) return;
         const bossEl = document.querySelector('.boss');
         if (!bossEl) return;
-
         const bossCenterX = parseInt(bossEl.style.left) + 165;
         const bossCenterY = parseInt(bossEl.style.top) + 165;
-
         const bullets = document.getElementsByClassName('bullet');
+
         for (let b of bullets) {
           const bulletLeft = parseInt(b.style.left);
           const bulletTop = container.offsetHeight - parseInt(b.style.bottom) - 25;
-
           const dx = Math.abs(bulletLeft + 12 - bossCenterX);
           const dy = Math.abs(bulletTop - bossCenterY);
 
@@ -417,21 +426,35 @@
         }
       }, 80);
 
-      const ENEMY_INTERVAL_MS = 360;
+      const ENEMY_INTERVAL_MS = mode === '30' ? 250 : 360; 
       const enemyInterval = setInterval(() => {
         if (GAME_ID !== myId) return;
-        if (document.querySelector('.boss')) return;
+        if (document.querySelector('.boss')) return; 
+
+        const isGolden = (mode === '30' && Math.random() < 0.15);
 
         const enemy = document.createElement('div');
         enemy.className = 'enemy';
         enemy.dataset.state = 'alive';
-        enemy.innerHTML = `<img src="${enemyAsset}" alt="enemy">`;
+        enemy.dataset.type = isGolden ? 'golden' : 'normal';
+
+        if (isGolden) {
+          enemy.innerHTML = '✨🦷✨'; 
+          enemy.style.fontSize = '35px';
+          enemy.style.filter = 'drop-shadow(0 0 10px gold)';
+        } else {
+          enemy.innerHTML = `<img src="${enemyAsset}" alt="enemy">`;
+        }
+
         enemy.style.left = Math.random() * (window.innerWidth - 50) + 'px';
         enemy.style.top = '-50px';
         container.appendChild(enemy);
 
         let ePos = -50;
         let speed = 4.7 + Math.min(score / 1300, 9);
+        
+        if (mode === '30') speed *= 1.4;
+        if (isGolden) speed *= 1.8;
 
         const t = setInterval(() => {
           if (GAME_ID !== myId) { clearInterval(t); return; }
@@ -445,21 +468,21 @@
 
             const bulletLeft = parseInt(b.style.left);
             const bulletTop = container.offsetHeight - parseInt(b.style.bottom) - 25;
-
-            const enemyLeft = parseInt(enemy.style.left) + 25;
+            const enemyLeft = parseInt(enemy.style.left) + (isGolden ? 15 : 25);
             const enemyTop = parseInt(enemy.style.top) + 25;
 
             if (Math.abs(bulletLeft + 12 - enemyLeft) < 30 && Math.abs(bulletTop - enemyTop) < 35) {
               enemy.dataset.state = 'dead';
               enemy.innerHTML = '✨';
-
               b.remove();
-              score += 10;
+
+              const addScore = enemy.dataset.type === 'golden' ? 300 : 10;
+              score += addScore;
               scoreEl.innerText = "SCORE: " + score;
 
               setTimeout(() => enemy.remove(), 100);
 
-              if (score >= nextBossAt) {
+              if (mode === '60' && score >= nextBossAt) {
                 nextBossAt += 500;
                 if (!document.querySelector('.boss')) spawnBoss();
               }
@@ -496,7 +519,9 @@
           bossHPContainer.style.display = 'none';
 
           scoreEl.innerText = "SCORE: " + score;
-
+          
+          // モードに合わせてリザルト画面のタイトルも変更
+          endResultTitle.innerText = mode === '30' ? 'スコアランキング (30秒運ゲー)' : 'スコアランキング (60秒)';
           resultScoreEl.textContent = `今回のスコア：${score.toLocaleString()}`;
           rankingTbody.innerHTML = `<tr><td colspan="3">読み込み中…</td></tr>`;
           loadingRankingEl.style.display = 'block';
@@ -504,10 +529,10 @@
           resultOverlay.style.display = 'flex';
           startOverlay.style.display = 'none';
 
-          try { await apiAddScore(name, score); } catch (err) { console.warn(err); }
+          try { await apiAddScore(name, score, mode); } catch (err) { console.warn(err); }
 
           try {
-            const data = await apiGetTop();
+            const data = await apiGetTop(mode);
             if (GAME_ID !== myId) return;
             renderRanking(data.top || [], rankingTbody);
           } catch (err) {
@@ -531,14 +556,34 @@
 
     showStart();
 
-    // ＝＝＝＝ ここから TOP画面のランキングボタン処理 ＝＝＝＝
-    viewRankingBtn.addEventListener('click', async () => {
-      topRankingOverlay.style.display = 'flex'; // モーダル表示
+    // ＝＝＝＝ TOP画面のボタン処理 ＝＝＝＝
+    start60Btn.addEventListener('click', () => {
+      const name = (nameInput.value || '').trim() || '名無し';
+      localStorage.setItem('teeth_name', name);
+      startOverlay.style.display = 'none';
+      resultOverlay.style.display = 'none';
+      currentMode = '60';
+      startGameWithName(name, '60');
+    });
+
+    start30Btn.addEventListener('click', () => {
+      const name = (nameInput.value || '').trim() || '名無し';
+      localStorage.setItem('teeth_name', name);
+      startOverlay.style.display = 'none';
+      resultOverlay.style.display = 'none';
+      currentMode = '30';
+      startGameWithName(name, '30');
+    });
+
+    // ランキングボタン共通の処理
+    async function openRanking(mode) {
+      topRankingOverlay.style.display = 'flex'; 
       topRankingTbody.innerHTML = '';
       topLoadingRanking.style.display = 'block';
+      topResultTitle.innerText = mode === '60' ? '現在のランキング (60秒)' : '現在のランキング (30秒)';
       
       try {
-        const data = await apiGetTop();
+        const data = await apiGetTop(mode);
         renderRanking(data.top || [], topRankingTbody);
       } catch (err) {
         console.warn(err);
@@ -546,29 +591,32 @@
       } finally {
         topLoadingRanking.style.display = 'none';
       }
-    });
+    }
+
+    viewRank60Btn.addEventListener('click', () => openRanking('60'));
+    viewRank30Btn.addEventListener('click', () => openRanking('30'));
 
     closeRankingBtn.addEventListener('click', () => {
-      topRankingOverlay.style.display = 'none'; // モーダル非表示
+      topRankingOverlay.style.display = 'none'; 
     });
     // ＝＝＝＝ ここまで ＝＝＝＝
-
-    startBtn.addEventListener('click', () => {
-      const name = (nameInput.value || '').trim() || '名無し';
-      localStorage.setItem('teeth_name', name);
-      startOverlay.style.display = 'none';
-      resultOverlay.style.display = 'none';
-      startGameWithName(name);
-    });
 
     retryBtn.addEventListener('click', () => {
       const name = localStorage.getItem('teeth_name') || '名無し';
       resultOverlay.style.display = 'none';
       startOverlay.style.display = 'none';
-      startGameWithName(name);
+      startGameWithName(name, currentMode);
     });
 
     changeNameBtn.addEventListener('click', () => showStart());
+
+    const beamChargeText = document.getElementById('beam-charge-text');
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      beamChargeText.innerText = '必殺技：画面を長押し';
+    } else {
+      beamChargeText.innerText = '必殺技：右クリック';
+    }
+
   </script>
 </body>
 </html>
