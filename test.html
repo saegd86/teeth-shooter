@@ -427,11 +427,13 @@
         }
       }, 80);
 
-      const ENEMY_INTERVAL_MS = mode === '30' ? 250 : 360; 
+     // 【変更後】100（0.1秒に1匹）や 50（0.05秒に1匹）にすると画面が菌だらけに！
+      const ENEMY_INTERVAL_MS = mode === '30' ? 80 : 360;
       const enemyInterval = setInterval(() => {
         if (GAME_ID !== myId) return;
         if (document.querySelector('.boss')) return; 
 
+        // 【変更前】0.15（15%の確率で金の歯）
         const isGolden = (mode === '30' && Math.random() < 0.15);
 
         const enemy = document.createElement('div');
@@ -454,8 +456,9 @@
         let ePos = -50;
         let speed = 4.7 + Math.min(score / 1300, 9);
         
-        if (mode === '30') speed *= 1.4;
-        if (isGolden) speed *= 1.8;
+        // 【変更後】通常は2.5倍、金の歯は3.5倍のスピード
+        if (mode === '30') speed *= 2.5;
+        if (isGolden) speed *= 3.5;
 
         const t = setInterval(() => {
           if (GAME_ID !== myId) { clearInterval(t); return; }
