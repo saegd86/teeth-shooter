@@ -114,7 +114,7 @@
       
       <!-- 👇ここから追加👇 -->
       <div id="update-memo">
-        【アップデート情報】Ver.20260731<br>
+        【アップデート情報】Ver.20260801<br>
         ・60秒モードに<span>レア敵（金の歯）</span>が稀に出現！<br>
         ・60秒モードの後半、<span>スコアインフレボーナス</span>実装！<br>
         ・30秒モード：スピード調整、キャラ変更、<span>貫通弾</span>実装！
@@ -384,9 +384,9 @@
         boss.style.top = '-180px';
         container.appendChild(boss);
 
-        //ボスの移動範囲、はみ出し幅を「100」に縮小！
+        //ボスの移動範囲、はみ出し幅を「120」に縮小！
         let ty = -180; let tx = startX; let dir = 1;
-        const leftBound = -100; const rightBound = window.innerWidth - bossSize + 100;
+        const leftBound = -120; const rightBound = window.innerWidth - bossSize + 120;
         const stepX = 3; const stepY = 2;
 
         const bt = setInterval(() => {
@@ -437,7 +437,6 @@
           if (mode === '60') {
             // 60秒モードなら新しいレア画像（はぐれメタル枠）
             enemy.innerHTML = `<img src="${rare60Asset}" alt="rare60">`;
-            enemy.style.filter = 'drop-shadow(0 0 10px red)'; // 光る色も赤などに変更
           } else {
             // 30秒モードならいつもの金の歯
             enemy.innerHTML = `<img src="${goldenAsset}" alt="golden">`;
