@@ -117,7 +117,7 @@
         【アップデート情報】Ver.20260731<br>
         ・60秒モードに<span>レア敵（金の歯）</span>が稀に出現！<br>
         ・60秒モードの後半、<span>スコアインフレボーナス</span>実装！<br>
-        ・30秒モード：スピード調整、<span>貫通弾</span>実装！
+        ・30秒モード：スピード調整、キャラ変更、<span>貫通弾</span>実装！
       </div>
       <!-- 👆ここまで追加👆 -->
 
@@ -168,6 +168,16 @@
     const enemyAsset  = 'enemy.png';
     const bossAsset   = 'boss.png';
     const goldenAsset = 'golden.png';
+    const rare60Asset = 'rare60.png'; // 👈 60秒モードのレア敵画像を追加！
+    // 👇 追加：30秒モードで降らせたい表情画像をリストにする（何個でも増やせます！）
+    const randomEnemyAssets = [
+      '31.png', 
+      '02.png', 
+      '06.png', 
+      '18.png', 
+      '28.png', 
+      '15.png'
+    ];
 
     const startOverlay = document.getElementById('start-overlay');
     const nameInput = document.getElementById('name-input');
@@ -421,12 +431,28 @@
         enemy.dataset.state = 'alive';
         enemy.dataset.type = isGolden ? 'golden' : 'normal';
 
-        // 金の歯を画像（goldenAsset）に戻しました！
+        // 敵の画像を設定している部分（レア敵と通常敵でさらにモード分岐！）
         if (isGolden) {
-          enemy.innerHTML = `<img src="${goldenAsset}" alt="golden">`;
-          enemy.style.filter = 'drop-shadow(0 0 10px gold)';
+          // 【レア敵の場合】
+          if (mode === '60') {
+            // 60秒モードなら新しいレア画像（はぐれメタル枠）
+            enemy.innerHTML = `<img src="${rare60Asset}" alt="rare60">`;
+            enemy.style.filter = 'drop-shadow(0 0 10px red)'; // 光る色も赤などに変更
+          } else {
+            // 30秒モードならいつもの金の歯
+            enemy.innerHTML = `<img src="${goldenAsset}" alt="golden">`;
+            enemy.style.filter = 'drop-shadow(0 0 10px gold)';
+          }
         } else {
-          enemy.innerHTML = `<img src="${enemyAsset}" alt="enemy">`;
+          // 【通常の敵の場合】
+          if (mode === '30') {
+            // 30秒モードなら、表情リストからランダムで1つ選ぶ
+            const randomImg = randomEnemyAssets[Math.floor(Math.random() * randomEnemyAssets.length)];
+            enemy.innerHTML = `<img src="${randomImg}" alt="enemy">`;
+          } else {
+            // 60秒モードならいつもの通常の敵
+            enemy.innerHTML = `<img src="${enemyAsset}" alt="enemy">`;
+          }
         }
 
         enemy.style.left = Math.random() * (window.innerWidth - 50) + 'px';
