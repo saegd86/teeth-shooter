@@ -308,7 +308,8 @@
 
       const bulletInterval = setInterval(() => {
         if (GAME_ID !== myId) return;
-        let angles = [ [-8, 0, 8][Math.floor(Math.random() * 3)] ];
+        // 【変更後】（30秒モードなら3方向に同時発射！もっと派手にしたいなら [-16, -8, 0, 8, 16] の5方向にしてもOK！）
+        let angles = mode === '30' ? [-12, 0, 12] : [ [-8, 0, 8][Math.floor(Math.random() * 3)] ];
         angles.forEach(angle => {
           const bullet = document.createElement('div');
           bullet.className = 'bullet';
@@ -402,8 +403,9 @@
 
         let ePos = -50;
         let speed = 4.7 + Math.min(score / 1300, 9);
-        if (mode === '30') speed *= 2.0;
-        if (isGolden) speed *= 2.5;
+        // 【変更後】（1.2倍〜1.4倍くらいに落とすと、数が多いのにゆっくりで的当て感が出ます！）
+        if (mode === '30') speed *= 1.2;
+        if (isGolden) speed *= 1.5;
 
         const t = setInterval(() => {
           if (GAME_ID !== myId) { clearInterval(t); return; }
