@@ -343,8 +343,9 @@
         boss.style.top = '-180px';
         container.appendChild(boss);
 
+        //ボスの移動範囲、はみ出し幅を「100」に縮小！
         let ty = -180; let tx = startX; let dir = 1;
-        const leftBound = -260; const rightBound = window.innerWidth - bossSize + 260;
+        const leftBound = -100; const rightBound = window.innerWidth - bossSize + 100;
         const stepX = 3; const stepY = 2;
 
         const bt = setInterval(() => {
