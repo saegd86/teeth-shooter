@@ -132,7 +132,7 @@
       <div id="loading-ranking">ランキング取得中…</div>
       <div class="row-buttons">
         <button id="retry-btn" class="btn" type="button">リトライ</button>
-        <button id="change-name-btn" class="btn" type="button">名前変更して戻る</button>
+        <button id="change-name-btn" class="btn" type="button">名前変更・TOPに戻る</button>
       </div>
       <div id="ranking-note">※名前は前回入力したものを使用します</div>
     </div>
@@ -422,9 +422,10 @@
             // 金の歯すり抜け防止のため判定を拡大（40と60）
             if (Math.abs(bulletLeft + 12 - enemyLeft) < 40 && Math.abs(bulletTop - enemyTop) < 60) {
               enemy.dataset.state = 'dead';
-              enemy.innerHTML = '✨';
-              b.remove();
-              const addScore = enemy.dataset.type === 'golden' ? 300 : 10;
+            // 【変更後】（60秒モードの時だけ水滴を消すようにします）
+            enemy.innerHTML = '✨';
+            if (mode === '60') { b.remove(); } // ← ココ！30秒モードなら消えずに貫通！
+            const addScore = enemy.dataset.type === 'golden' ? 300 : 10;
               score += addScore;
               scoreEl.innerText = "SCORE: " + score;
               setTimeout(() => enemy.remove(), 100);
