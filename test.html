@@ -275,7 +275,11 @@
             if (e.dataset.state !== 'alive') continue;
             if (Math.abs(parseInt(e.style.left) - (playerX - 25)) < 70) {
               e.dataset.state = 'dead';
-              const addScore = e.dataset.type === 'golden' ? 500 : 20;
+              let addScore = e.dataset.type === 'golden' ? 500 : 20;
+              if (mode === '60') {
+                const multiplier = 1 + Math.floor(score / 1000);
+                addScore = e.dataset.type === 'golden' ? 500 : 20 * multiplier;
+              }
               score += addScore;
               scoreEl.innerText = "SCORE: " + score;
               e.innerHTML = '✨';
@@ -308,8 +312,8 @@
 
       const bulletInterval = setInterval(() => {
         if (GAME_ID !== myId) return;
-        // 【変更後】（30秒モードなら3方向に同時発射！もっと派手にしたいなら [-16, -8, 0, 8, 16] の5方向にしてもOK！）
-        let angles = mode === '30' ? [-12, 0, 12] : [ [-8, 0, 8][Math.floor(Math.random() * 3)] ];
+        // 【変更】let angles = mode === '30' ? [-12, 0, 12] : [ [-8, 0, 8][Math.floor(Math.random() * 3)] ];（30秒モードなら3方向に同時発射！もっと派手にしたいなら [-16, -8, 0, 8, 16] の5方向にしてもOK！）
+        let angles = [ [-8, 0, 8][Math.floor(Math.random() * 3)] ];
         angles.forEach(angle => {
           const bullet = document.createElement('div');
           bullet.className = 'bullet';
@@ -326,7 +330,8 @@
             if (bPB > window.innerHeight || bPL < -20 || bPL > window.innerWidth + 20) { clearInterval(t); bullet.remove(); }
           }, 10);
         });
-        charge = Math.min(100, charge + 3);
+        // 【変更後】（30秒モードなら5倍のスピードでギュイーンと溜まる！）
+        charge = Math.min(100, charge + (mode === '30' ? 15 : 3));
         if (chargeFill) chargeFill.style.width = charge + '%';
       }, 220);
 
@@ -383,7 +388,9 @@
         if (GAME_ID !== myId) return;
         if (document.querySelector('.boss')) return; 
 
-        const isGolden = (mode === '30' && Math.random() < 0.15);
+        // 30秒なら15%、60秒なら3%の確率で出現！
+        const isGolden = (mode === '30' ? Math.random() < 0.15 : Math.random() < 0.03);
+        
         const enemy = document.createElement('div');
         enemy.className = 'enemy';
         enemy.dataset.state = 'alive';
@@ -427,7 +434,12 @@
               // 30秒モードの貫通弾設定！（60秒モードの時だけ水滴が消える）
               if (mode === '60') { b.remove(); }
               
-              const addScore = enemy.dataset.type === 'golden' ? 300 : 10;
+              let addScore = enemy.dataset.type === 'golden' ? 300 : 10;
+              // 60秒モード限定：1000点超えるごとに通常敵の点数が倍増！
+              if (mode === '60') {
+                const multiplier = 1 + Math.floor(score / 1000);
+                addScore = enemy.dataset.type === 'golden' ? 300 : 10 * multiplier;
+              }
               score += addScore;
               scoreEl.innerText = "SCORE: " + score;
               setTimeout(() => enemy.remove(), 100);
