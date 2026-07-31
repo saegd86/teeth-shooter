@@ -10,18 +10,18 @@
     body { background: #222; color: white; text-align: center; overflow: hidden; margin: 0; font-family: sans-serif; }
     #game-container { position: relative; width: 100vw; height: 100vh; background: radial-gradient(circle, #ffc0cb, #ffb6c1); margin: 0 auto; border-bottom: 8px solid #ff69b4; overflow: hidden; touch-action: none; cursor: crosshair; }
     
-    /* スコアとタイマーの連打選択を防止 */
     #score { position: absolute; top: 20px; left: 20px; color: #d00000; font-size: 32px; font-weight: bold; z-index: 100; text-shadow: 2px 2px 0px white; user-select: none; -webkit-user-select: none; pointer-events: none; }
     #timer { position: absolute; top: 20px; right: 20px; font-weight: 900; font-size: 26px; color: #0066ff; text-shadow: 1px 1px 0 rgba(255,255,255,0.7); z-index: 100; user-select: none; -webkit-user-select: none; pointer-events: none; }
     
-    #player { position: absolute; bottom: 90px; left: 50%; z-index: 10; transition: 0.05s; transform: translateX(-50%); }
-    /* プレイヤーをスッキリサイズ（80px）に！ */
+    /* プレイヤーの立ち位置を上に調整（bottom: 90px → 120px） */
+    #player { position: absolute; bottom: 120px; left: 50%; z-index: 10; transition: 0.05s; transform: translateX(-50%); }
     #player img { width: 80px; height: 80px; object-fit: contain; display: block; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; pointer-events:none; -webkit-user-drag:none; }
     
     .enemy { position: absolute; z-index: 5; text-align: center; }
     .enemy img { width: 50px; height: 50px; object-fit: contain; display: block; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; pointer-events:none; -webkit-user-drag:none; }
     .bullet { position: absolute; font-size: 25px; z-index: 4; pointer-events:none; user-select:none; }
-    .beam { position: absolute; bottom: 100px; width: 50px; background: rgba(0, 255, 255, 0.7); box-shadow: 0 0 20px #00ffff; transform: translateX(-50%); z-index: 3; }
+    /* ビームの発生位置も上に調整（bottom: 100px → 130px） */
+    .beam { position: absolute; bottom: 130px; width: 50px; background: rgba(0, 255, 255, 0.7); box-shadow: 0 0 20px #00ffff; transform: translateX(-50%); z-index: 3; }
 
     #charge-container { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); width: 320px; z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 7px; pointer-events: none; }
     #charge-frame { width: 100%; height: 8px; background: #555; border-radius: 5px; overflow: hidden; }
@@ -32,7 +32,6 @@
     #boss-hp { width: 100%; height: 100%; background: #ff0000; }
 
     .boss { position: absolute; z-index: 6; }
-    /* ボスをスッキリサイズ（180px）に！ */
     .boss img { width: 180px; height: 180px; object-fit: contain; display: block; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; pointer-events:none; -webkit-user-drag:none; }
 
     #start-overlay, #result-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 12px; box-sizing: border-box; }
@@ -88,7 +87,6 @@
     <div id="start-box">
       <h2>歯の防衛軍</h2>
       <p>名前を入力して、モードを選択！</p>
-      <!-- 名前は20文字まで！ -->
       <input id="name-input" maxlength="20" placeholder="例：がいどん" />
       <div class="start-buttons">
         <button id="start-60-btn" class="btn" type="button">60秒スタート</button>
@@ -144,6 +142,7 @@
     const playerAsset = 'player.png';
     const enemyAsset  = 'enemy.png';
     const bossAsset   = 'boss.png';
+    const goldenAsset = 'golden.png';
 
     const startOverlay = document.getElementById('start-overlay');
     const nameInput = document.getElementById('name-input');
@@ -287,7 +286,6 @@
           if (bossActive) {
             const bElement = document.querySelector('.boss');
             if (bElement) {
-              // 判定を180pxサイズ用に調整
               const bossCenterX = parseInt(bElement.style.left) + 90;
               if (Math.abs(bossCenterX - playerX) < 60) damageBoss(5);
             }
@@ -316,10 +314,11 @@
           bullet.className = 'bullet';
           bullet.innerHTML = '💧';
           bullet.style.left = (playerX - 12) + 'px';
-          bullet.style.bottom = '90px';
+          // 水滴の発生位置もプレイヤーに合わせて上に調整
+          bullet.style.bottom = '120px';
           container.appendChild(bullet);
 
-          let bPB = 90, bPL = playerX - 12;
+          let bPB = 120, bPL = playerX - 12;
           const t = setInterval(() => {
             bPB += 18; bPL += (angle / 4);
             bullet.style.bottom = bPB + 'px'; bullet.style.left = bPL + 'px';
@@ -338,7 +337,7 @@
         boss.className = 'boss';
         boss.innerHTML = `<img src="${bossAsset}" alt="boss">`;
 
-        const bossSize = 180; // 180pxに縮小
+        const bossSize = 180;
         const startX = window.innerWidth / 2 - bossSize / 2;
         boss.style.left = startX + 'px';
         boss.style.top = '-180px';
@@ -351,7 +350,7 @@
         const bt = setInterval(() => {
           if (GAME_ID !== myId) { clearInterval(bt); return; }
           if (!bossActive) { clearInterval(bt); boss.remove(); return; }
-          if (ty < 80) ty += stepY; // いい感じの高さで止まるように調整
+          if (ty < 80) ty += stepY;
           tx += stepX * dir;
           if (tx > rightBound) { tx = rightBound; dir = -1; }
           if (tx < leftBound) { tx = leftBound; dir = 1; }
@@ -363,7 +362,6 @@
         if (GAME_ID !== myId || !bossActive) return;
         const bossEl = document.querySelector('.boss');
         if (!bossEl) return;
-        // 判定を180pxサイズ用に調整
         const bossCenterX = parseInt(bossEl.style.left) + 90;
         const bossCenterY = parseInt(bossEl.style.top) + 90;
         const bullets = document.getElementsByClassName('bullet');
@@ -378,7 +376,7 @@
         }
       }, 80);
 
-      const ENEMY_INTERVAL_MS = mode === '30' ? 250 : 360; 
+      const ENEMY_INTERVAL_MS = mode === '30' ? 80 : 360; 
       const enemyInterval = setInterval(() => {
         if (GAME_ID !== myId) return;
         if (document.querySelector('.boss')) return; 
@@ -389,9 +387,9 @@
         enemy.dataset.state = 'alive';
         enemy.dataset.type = isGolden ? 'golden' : 'normal';
 
+        // 金の歯を画像（goldenAsset）に戻しました！
         if (isGolden) {
-          enemy.innerHTML = '✨🦷✨'; 
-          enemy.style.fontSize = '35px';
+          enemy.innerHTML = `<img src="${goldenAsset}" alt="golden">`;
           enemy.style.filter = 'drop-shadow(0 0 10px gold)';
         } else {
           enemy.innerHTML = `<img src="${enemyAsset}" alt="enemy">`;
@@ -403,8 +401,8 @@
 
         let ePos = -50;
         let speed = 4.7 + Math.min(score / 1300, 9);
-        if (mode === '30') speed *= 1.4;
-        if (isGolden) speed *= 1.8;
+        if (mode === '30') speed *= 2.0;
+        if (isGolden) speed *= 2.5;
 
         const t = setInterval(() => {
           if (GAME_ID !== myId) { clearInterval(t); return; }
@@ -419,13 +417,14 @@
             const enemyLeft = parseInt(enemy.style.left) + (isGolden ? 15 : 25);
             const enemyTop = parseInt(enemy.style.top) + 25;
 
-            // 金の歯すり抜け防止のため判定を拡大（40と60）
             if (Math.abs(bulletLeft + 12 - enemyLeft) < 40 && Math.abs(bulletTop - enemyTop) < 60) {
               enemy.dataset.state = 'dead';
-            // 【変更後】（60秒モードの時だけ水滴を消すようにします）
-            enemy.innerHTML = '✨';
-            if (mode === '60') { b.remove(); } // ← ココ！30秒モードなら消えずに貫通！
-            const addScore = enemy.dataset.type === 'golden' ? 300 : 10;
+              enemy.innerHTML = '✨';
+              
+              // 30秒モードの貫通弾設定！（60秒モードの時だけ水滴が消える）
+              if (mode === '60') { b.remove(); }
+              
+              const addScore = enemy.dataset.type === 'golden' ? 300 : 10;
               score += addScore;
               scoreEl.innerText = "SCORE: " + score;
               setTimeout(() => enemy.remove(), 100);
