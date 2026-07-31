@@ -114,9 +114,10 @@
       
       <!-- 👇ここから追加👇 -->
       <div id="update-memo">
-        【アップデート情報】<br>
+        【アップデート情報】Ver.20260731<br>
         ・60秒モードに<span>レア敵（金の歯）</span>が稀に出現！<br>
-        ・60秒モードの後半、<span>スコアインフレボーナス</span>実装！
+        ・60秒モードの後半、<span>スコアインフレボーナス</span>実装！<br>
+        ・30秒モード：スピード調整、<span>貫通弾</span>実装！
       </div>
       <!-- 👆ここまで追加👆 -->
 
@@ -252,7 +253,7 @@
       let charge = 0;
       let bossActive = false;
       let bossHP = 100;
-      let nextBossAt = 1100;
+      let nextBossAt = 1000;  // 👈 キリ良く1000点に変更！
       const GAME_MS = mode === '30' ? 30 * 1000 : 60 * 1000;
       const startTime = Date.now();
       timerEl.textContent = mode === '30' ? '30' : '60';
@@ -468,8 +469,9 @@
               scoreEl.innerText = "SCORE: " + score;
               setTimeout(() => enemy.remove(), 100);
 
+              // 【変更後】「前回ボスが出た点数 ＋ 1500点（ボス1000点＋ザコ500点）」にセット！
               if (mode === '60' && score >= nextBossAt) {
-                nextBossAt += 500;
+                nextBossAt += 1500; 
                 if (!document.querySelector('.boss')) spawnBoss();
               }
               clearInterval(t); return;
