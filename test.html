@@ -9,12 +9,17 @@
   <style>
     body { background: #222; color: white; text-align: center; overflow: hidden; margin: 0; font-family: sans-serif; }
     #game-container { position: relative; width: 100vw; height: 100vh; background: radial-gradient(circle, #ffc0cb, #ffb6c1); margin: 0 auto; border-bottom: 8px solid #ff69b4; overflow: hidden; touch-action: none; cursor: crosshair; }
+    
+    /* スコアとタイマーの連打選択を防止 */
     #score { position: absolute; top: 20px; left: 20px; color: #d00000; font-size: 32px; font-weight: bold; z-index: 100; text-shadow: 2px 2px 0px white; user-select: none; -webkit-user-select: none; pointer-events: none; }
     #timer { position: absolute; top: 20px; right: 20px; font-weight: 900; font-size: 26px; color: #0066ff; text-shadow: 1px 1px 0 rgba(255,255,255,0.7); z-index: 100; user-select: none; -webkit-user-select: none; pointer-events: none; }
+    
     #player { position: absolute; bottom: 90px; left: 50%; z-index: 10; transition: 0.05s; transform: translateX(-50%); }
-    #player img { width: 140px; height: 140px; object-fit: contain; display: block; user-select:none; pointer-events:none; -webkit-user-drag:none; }
+    /* プレイヤーをスッキリサイズ（80px）に！ */
+    #player img { width: 80px; height: 80px; object-fit: contain; display: block; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; pointer-events:none; -webkit-user-drag:none; }
+    
     .enemy { position: absolute; z-index: 5; text-align: center; }
-    .enemy img { width: 50px; height: 50px; object-fit: contain; display: block; user-select:none; pointer-events:none; -webkit-user-drag:none; }
+    .enemy img { width: 50px; height: 50px; object-fit: contain; display: block; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; pointer-events:none; -webkit-user-drag:none; }
     .bullet { position: absolute; font-size: 25px; z-index: 4; pointer-events:none; user-select:none; }
     .beam { position: absolute; bottom: 100px; width: 50px; background: rgba(0, 255, 255, 0.7); box-shadow: 0 0 20px #00ffff; transform: translateX(-50%); z-index: 3; }
 
@@ -27,7 +32,8 @@
     #boss-hp { width: 100%; height: 100%; background: #ff0000; }
 
     .boss { position: absolute; z-index: 6; }
-    .boss img { width: 330px; height: 330px; object-fit: contain; display: block; user-select:none; pointer-events:none; -webkit-user-drag:none; }
+    /* ボスをスッキリサイズ（180px）に！ */
+    .boss img { width: 180px; height: 180px; object-fit: contain; display: block; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; pointer-events:none; -webkit-user-drag:none; }
 
     #start-overlay, #result-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 12px; box-sizing: border-box; }
     #start-box, #result-box { background: rgba(255,255,255,0.92); color: #1b1b1b; border-radius: 16px; padding: 18px 16px; width: min(560px, 94vw); text-align: center; box-shadow: 0 12px 32px rgba(0,0,0,0.25); }
@@ -35,10 +41,8 @@
     #start-box p { margin: 0 0 14px; font-weight: 800; }
 
     #name-input { width: 100%; max-width: 320px; padding: 12px 12px; border-radius: 12px; border: 2px solid rgba(255,105,180,0.6); outline: none; font-size: 16px; font-weight: 800; }
-    
     .btn { border: none; border-radius: 12px; cursor: pointer; font-weight: 950; font-size: 14px; }
     
-    /* TOP画面のボタン並び用（2x2のグリッド風に調整） */
     .start-buttons { display: flex; gap: 8px; justify-content: center; margin-top: 15px; flex-wrap: wrap; max-width: 320px; margin-left: auto; margin-right: auto; }
     #start-60-btn, #start-30-btn { width: 48%; padding: 12px 0; }
     #start-60-btn { background: #00ffff; color: #003; box-shadow: 0 6px 14px rgba(0,255,255,0.25); }
@@ -62,7 +66,6 @@
     #ranking-note { margin-top: 10px; font-size: 12px; color: rgba(0,0,0,0.55); font-weight: 800; }
     #loading-ranking { margin-top: 10px; font-weight: 1000; color: rgba(0,0,0,0.55); display:none; }
     
-    /* TOP画面のランキング確認用モーダル */
     #top-ranking-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100000; padding: 12px; box-sizing: border-box; }
     #top-ranking-box { background: rgba(255,255,255,0.95); color: #1b1b1b; border-radius: 16px; padding: 20px 16px; width: min(560px, 94vw); text-align: center; box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
     #close-ranking-btn { margin-top: 15px; width: 180px; padding: 12px 0; background: #ddd; color: #333; }
@@ -73,22 +76,19 @@
   <div id="game-container">
     <div id="score">SCORE: 0</div>
     <div id="timer">60</div>
-
     <div id="player" aria-label="player"></div>
-
     <div id="boss-hp-container"><div id="boss-hp"></div></div>
-
     <div id="charge-container">
       <div id="charge-frame"><div id="charge-fill"></div></div>
       <div id="beam-charge-text"></div>
     </div>
   </div>
 
-  <!-- 開始画面 -->
   <div id="start-overlay">
     <div id="start-box">
       <h2>歯の防衛軍</h2>
       <p>名前を入力して、モードを選択！</p>
+      <!-- 名前は20文字まで！ -->
       <input id="name-input" maxlength="20" placeholder="例：がいどん" />
       <div class="start-buttons">
         <button id="start-60-btn" class="btn" type="button">60秒スタート</button>
@@ -101,7 +101,6 @@
     </div>
   </div>
 
-  <!-- TOP画面から見るランキングモーダル -->
   <div id="top-ranking-overlay">
     <div id="top-ranking-box">
       <div id="top-result-title" class="result-title-class">現在のランキング</div>
@@ -118,12 +117,10 @@
     </div>
   </div>
 
-  <!-- リザルト画面 -->
   <div id="result-overlay" style="display:none;">
     <div id="result-box">
       <div id="end-result-title" class="result-title-class">スコアランキング</div>
       <div id="result-score"></div>
-
       <div id="ranking-table-wrap">
         <table id="ranking-table">
           <thead>
@@ -132,14 +129,11 @@
           <tbody id="ranking-tbody"></tbody>
         </table>
       </div>
-
       <div id="loading-ranking">ランキング取得中…</div>
-
       <div class="row-buttons">
         <button id="retry-btn" class="btn" type="button">リトライ</button>
         <button id="change-name-btn" class="btn" type="button">名前変更して戻る</button>
       </div>
-
       <div id="ranking-note">※名前は前回入力したものを使用します</div>
     </div>
   </div>
@@ -150,7 +144,6 @@
     const playerAsset = 'player.png';
     const enemyAsset  = 'enemy.png';
     const bossAsset   = 'boss.png';
-    const goldenAsset = 'golden.png';
 
     const startOverlay = document.getElementById('start-overlay');
     const nameInput = document.getElementById('name-input');
@@ -189,14 +182,12 @@
       }[c]));
     }
 
-    // modeパラメータを追加
     async function apiAddScore(name, score, mode) {
       const url = GAS_URL + '?action=add&name=' + encodeURIComponent(name) + '&score=' + encodeURIComponent(score) + '&mode=' + encodeURIComponent(mode);
       const res = await fetch(url, { method: 'POST' });
       return res.json().catch(() => ({}));
     }
 
-    // modeパラメータを追加
     async function apiGetTop(mode) {
       const url = GAS_URL + '?action=list&mode=' + encodeURIComponent(mode);
       const res = await fetch(url, { method: 'GET' });
@@ -206,23 +197,13 @@
     function renderRanking(top, targetTbody) {
       const uniqueData = [];
       const seenNames = new Set();
-
       (top || []).forEach(record => {
         const name = record.name || '';
-        if (!seenNames.has(name)) {
-          seenNames.add(name);
-          uniqueData.push(record);
-        }
+        if (!seenNames.has(name)) { seenNames.add(name); uniqueData.push(record); }
       });
-
       const top10Data = uniqueData.slice(0, 10);
-
       const rows = top10Data.map((r, i) => `
-        <tr>
-          <td>${i + 1}</td>
-          <td>${escapeHtml(r.name || '')}</td>
-          <td style="text-align:right; padding-right:6px;">${Number(r.score || 0).toLocaleString()}</td>
-        </tr>
+        <tr><td>${i + 1}</td><td>${escapeHtml(r.name || '')}</td><td style="text-align:right; padding-right:6px;">${Number(r.score || 0).toLocaleString()}</td></tr>
       `).join('');
       targetTbody.innerHTML = rows || `<tr><td colspan="3">まだデータなし</td></tr>`;
     }
@@ -240,7 +221,6 @@
     function startGameWithName(name, mode) {
       GAME_ID++;
       const myId = GAME_ID;
-
       resetStage();
       resultOverlay.style.display = 'none';
       scoreEl.innerText = "SCORE: 0";
@@ -249,7 +229,6 @@
       let charge = 0;
       let bossActive = false;
       let bossHP = 100;
-
       let nextBossAt = 1100;
       const GAME_MS = mode === '30' ? 30 * 1000 : 60 * 1000;
       const startTime = Date.now();
@@ -272,7 +251,6 @@
           bossHPContainer.style.display = 'none';
           score += 1000;
           scoreEl.innerText = "SCORE: " + score;
-
           const bEl = document.querySelector('.boss');
           if (bEl) { bEl.innerHTML = '✨💥✨'; setTimeout(() => bEl.remove(), 500); }
         }
@@ -282,7 +260,6 @@
         if (charge < 100) return;
         charge = 0;
         if (chargeFill) chargeFill.style.width = '0%';
-
         const beam = document.createElement('div');
         beam.className = 'beam';
         beam.style.left = playerEl.style.left;
@@ -291,7 +268,6 @@
         let h = 0;
         const beamTimer = setInterval(() => {
           if (GAME_ID !== myId) { clearInterval(beamTimer); return; }
-
           h += 60;
           beam.style.height = h + 'px';
 
@@ -311,15 +287,13 @@
           if (bossActive) {
             const bElement = document.querySelector('.boss');
             if (bElement) {
-              const bossCenterX = parseInt(bElement.style.left) + 165;
-              if (Math.abs(bossCenterX - playerX) < 70) damageBoss(5);
+              // 判定を180pxサイズ用に調整
+              const bossCenterX = parseInt(bElement.style.left) + 90;
+              if (Math.abs(bossCenterX - playerX) < 60) damageBoss(5);
             }
           }
 
-          if (h > window.innerHeight) {
-            clearInterval(beamTimer);
-            setTimeout(() => beam.remove(), 200);
-          }
+          if (h > window.innerHeight) { clearInterval(beamTimer); setTimeout(() => beam.remove(), 200); }
         }, 10);
       };
 
@@ -332,15 +306,11 @@
       container.ontouchend = () => { if (longPressTimer) clearTimeout(longPressTimer); longPressTimer = null; };
       container.ontouchcancel = () => { if (longPressTimer) clearTimeout(longPressTimer); longPressTimer = null; };
 
-      window.onkeydown = (e) => {
-        if (e.code === 'Space' || e.keyCode === 32) { e.preventDefault(); fireBeam(); }
-      };
+      window.onkeydown = (e) => { if (e.code === 'Space' || e.keyCode === 32) { e.preventDefault(); fireBeam(); } };
 
       const bulletInterval = setInterval(() => {
         if (GAME_ID !== myId) return;
-
         let angles = [ [-8, 0, 8][Math.floor(Math.random() * 3)] ];
-
         angles.forEach(angle => {
           const bullet = document.createElement('div');
           bullet.className = 'bullet';
@@ -351,57 +321,41 @@
 
           let bPB = 90, bPL = playerX - 12;
           const t = setInterval(() => {
-            bPB += 18;
-            bPL += (angle / 4);
-            bullet.style.bottom = bPB + 'px';
-            bullet.style.left = bPL + 'px';
-
-            if (bPB > window.innerHeight || bPL < -20 || bPL > window.innerWidth + 20) {
-              clearInterval(t);
-              bullet.remove();
-            }
+            bPB += 18; bPL += (angle / 4);
+            bullet.style.bottom = bPB + 'px'; bullet.style.left = bPL + 'px';
+            if (bPB > window.innerHeight || bPL < -20 || bPL > window.innerWidth + 20) { clearInterval(t); bullet.remove(); }
           }, 10);
         });
-
         charge = Math.min(100, charge + 3);
         if (chargeFill) chargeFill.style.width = charge + '%';
       }, 220);
 
       function spawnBoss() {
         if (document.querySelector('.boss')) return;
-        bossActive = true;
-        bossHP = 100;
-        bossHPBar.style.width = '100%';
-        bossHPContainer.style.display = 'block';
+        bossActive = true; bossHP = 100; bossHPBar.style.width = '100%'; bossHPContainer.style.display = 'block';
 
         const boss = document.createElement('div');
         boss.className = 'boss';
         boss.innerHTML = `<img src="${bossAsset}" alt="boss">`;
 
-        const bossSize = 330;
+        const bossSize = 180; // 180pxに縮小
         const startX = window.innerWidth / 2 - bossSize / 2;
-
         boss.style.left = startX + 'px';
         boss.style.top = '-180px';
         container.appendChild(boss);
 
-        let ty = -180;
-        let tx = startX;
-        let dir = 1;
-        const leftBound = -260;
-        const rightBound = window.innerWidth - bossSize + 260;
-        const stepX = 3;
-        const stepY = 2;
+        let ty = -180; let tx = startX; let dir = 1;
+        const leftBound = -260; const rightBound = window.innerWidth - bossSize + 260;
+        const stepX = 3; const stepY = 2;
 
         const bt = setInterval(() => {
           if (GAME_ID !== myId) { clearInterval(bt); return; }
           if (!bossActive) { clearInterval(bt); boss.remove(); return; }
-          if (ty < 120) ty += stepY;
+          if (ty < 80) ty += stepY; // いい感じの高さで止まるように調整
           tx += stepX * dir;
           if (tx > rightBound) { tx = rightBound; dir = -1; }
           if (tx < leftBound) { tx = leftBound; dir = 1; }
-          boss.style.top = ty + 'px';
-          boss.style.left = tx + 'px';
+          boss.style.top = ty + 'px'; boss.style.left = tx + 'px';
         }, 20);
       }
 
@@ -409,8 +363,9 @@
         if (GAME_ID !== myId || !bossActive) return;
         const bossEl = document.querySelector('.boss');
         if (!bossEl) return;
-        const bossCenterX = parseInt(bossEl.style.left) + 165;
-        const bossCenterY = parseInt(bossEl.style.top) + 165;
+        // 判定を180pxサイズ用に調整
+        const bossCenterX = parseInt(bossEl.style.left) + 90;
+        const bossCenterY = parseInt(bossEl.style.top) + 90;
         const bullets = document.getElementsByClassName('bullet');
 
         for (let b of bullets) {
@@ -419,31 +374,24 @@
           const dx = Math.abs(bulletLeft + 12 - bossCenterX);
           const dy = Math.abs(bulletTop - bossCenterY);
 
-          if (dx < 70 && dy < 90) {
-            b.remove();
-            damageBoss(3);
-            break;
-          }
+          if (dx < 60 && dy < 70) { b.remove(); damageBoss(3); break; }
         }
       }, 80);
 
-     // 【変更後】100（0.1秒に1匹）や 50（0.05秒に1匹）にすると画面が菌だらけに！
-      const ENEMY_INTERVAL_MS = mode === '30' ? 80 : 360;
+      const ENEMY_INTERVAL_MS = mode === '30' ? 250 : 360; 
       const enemyInterval = setInterval(() => {
         if (GAME_ID !== myId) return;
         if (document.querySelector('.boss')) return; 
 
-        // 【変更前】0.15（15%の確率で金の歯）
         const isGolden = (mode === '30' && Math.random() < 0.15);
-
         const enemy = document.createElement('div');
         enemy.className = 'enemy';
         enemy.dataset.state = 'alive';
         enemy.dataset.type = isGolden ? 'golden' : 'normal';
 
-       if (isGolden) {
-          enemy.innerHTML = `<img src="${goldenAsset}" alt="golden">`;
-          // 画像の周りがボワッと光るエフェクトは残しています！不要なら消してOKです
+        if (isGolden) {
+          enemy.innerHTML = '✨🦷✨'; 
+          enemy.style.fontSize = '35px';
           enemy.style.filter = 'drop-shadow(0 0 10px gold)';
         } else {
           enemy.innerHTML = `<img src="${enemyAsset}" alt="enemy">`;
@@ -455,67 +403,51 @@
 
         let ePos = -50;
         let speed = 4.7 + Math.min(score / 1300, 9);
-        
-        // 【変更後】通常は2.5倍、金の歯は3.5倍のスピード
-        if (mode === '30') speed *= 2.5;
-        if (isGolden) speed *= 3.5;
+        if (mode === '30') speed *= 1.4;
+        if (isGolden) speed *= 1.8;
 
         const t = setInterval(() => {
           if (GAME_ID !== myId) { clearInterval(t); return; }
-
           ePos += speed;
           enemy.style.top = ePos + 'px';
 
           const bullets = document.getElementsByClassName('bullet');
           for (let b of bullets) {
             if (enemy.dataset.state !== 'alive') continue;
-
             const bulletLeft = parseInt(b.style.left);
             const bulletTop = container.offsetHeight - parseInt(b.style.bottom) - 25;
             const enemyLeft = parseInt(enemy.style.left) + (isGolden ? 15 : 25);
             const enemyTop = parseInt(enemy.style.top) + 25;
 
-              if (Math.abs(bulletLeft + 12 - enemyLeft) < 40 && Math.abs(bulletTop - enemyTop) < 60) {
+            // 金の歯すり抜け防止のため判定を拡大（40と60）
+            if (Math.abs(bulletLeft + 12 - enemyLeft) < 40 && Math.abs(bulletTop - enemyTop) < 60) {
               enemy.dataset.state = 'dead';
               enemy.innerHTML = '✨';
               b.remove();
-
               const addScore = enemy.dataset.type === 'golden' ? 300 : 10;
               score += addScore;
               scoreEl.innerText = "SCORE: " + score;
-
               setTimeout(() => enemy.remove(), 100);
 
               if (mode === '60' && score >= nextBossAt) {
                 nextBossAt += 500;
                 if (!document.querySelector('.boss')) spawnBoss();
               }
-
-              clearInterval(t);
-              return;
+              clearInterval(t); return;
             }
           }
-
-          if (ePos > window.innerHeight) {
-            clearInterval(t);
-            enemy.remove();
-          }
+          if (ePos > window.innerHeight) { clearInterval(t); enemy.remove(); }
         }, 20);
       }, ENEMY_INTERVAL_MS);
 
       const timerTick = setInterval(async () => {
         if (GAME_ID !== myId) return;
-
         const elapsed = Date.now() - startTime;
         const remain = Math.max(0, GAME_MS - elapsed);
         timerEl.textContent = String(Math.ceil(remain / 1000));
 
         if (remain <= 0) {
-          clearInterval(timerTick);
-          clearInterval(enemyInterval);
-          clearInterval(bulletInterval);
-          clearInterval(bossDamageInterval);
-
+          clearInterval(timerTick); clearInterval(enemyInterval); clearInterval(bulletInterval); clearInterval(bossDamageInterval);
           [...document.getElementsByClassName('enemy')].forEach(x => x.remove());
           [...document.getElementsByClassName('bullet')].forEach(x => x.remove());
           const b = document.querySelector('.boss');
@@ -523,8 +455,6 @@
           bossHPContainer.style.display = 'none';
 
           scoreEl.innerText = "SCORE: " + score;
-          
-          // モードに合わせてリザルト画面のタイトルも変更
           endResultTitle.innerText = mode === '30' ? 'スコアランキング (30秒運ゲー)' : 'スコアランキング (60秒)';
           resultScoreEl.textContent = `今回のスコア：${score.toLocaleString()}`;
           rankingTbody.innerHTML = `<tr><td colspan="3">読み込み中…</td></tr>`;
@@ -534,7 +464,6 @@
           startOverlay.style.display = 'none';
 
           try { await apiAddScore(name, score, mode); } catch (err) { console.warn(err); }
-
           try {
             const data = await apiGetTop(mode);
             if (GAME_ID !== myId) return;
@@ -560,32 +489,25 @@
 
     showStart();
 
-    // ＝＝＝＝ TOP画面のボタン処理 ＝＝＝＝
     start60Btn.addEventListener('click', () => {
       const name = (nameInput.value || '').trim() || '名無し';
       localStorage.setItem('teeth_name', name);
-      startOverlay.style.display = 'none';
-      resultOverlay.style.display = 'none';
-      currentMode = '60';
-      startGameWithName(name, '60');
+      startOverlay.style.display = 'none'; resultOverlay.style.display = 'none';
+      currentMode = '60'; startGameWithName(name, '60');
     });
 
     start30Btn.addEventListener('click', () => {
       const name = (nameInput.value || '').trim() || '名無し';
       localStorage.setItem('teeth_name', name);
-      startOverlay.style.display = 'none';
-      resultOverlay.style.display = 'none';
-      currentMode = '30';
-      startGameWithName(name, '30');
+      startOverlay.style.display = 'none'; resultOverlay.style.display = 'none';
+      currentMode = '30'; startGameWithName(name, '30');
     });
 
-    // ランキングボタン共通の処理
     async function openRanking(mode) {
       topRankingOverlay.style.display = 'flex'; 
       topRankingTbody.innerHTML = '';
       topLoadingRanking.style.display = 'block';
       topResultTitle.innerText = mode === '60' ? '現在のランキング (60秒)' : '現在のランキング (30秒)';
-      
       try {
         const data = await apiGetTop(mode);
         renderRanking(data.top || [], topRankingTbody);
@@ -600,15 +522,11 @@
     viewRank60Btn.addEventListener('click', () => openRanking('60'));
     viewRank30Btn.addEventListener('click', () => openRanking('30'));
 
-    closeRankingBtn.addEventListener('click', () => {
-      topRankingOverlay.style.display = 'none'; 
-    });
-    // ＝＝＝＝ ここまで ＝＝＝＝
+    closeRankingBtn.addEventListener('click', () => { topRankingOverlay.style.display = 'none'; });
 
     retryBtn.addEventListener('click', () => {
       const name = localStorage.getItem('teeth_name') || '名無し';
-      resultOverlay.style.display = 'none';
-      startOverlay.style.display = 'none';
+      resultOverlay.style.display = 'none'; startOverlay.style.display = 'none';
       startGameWithName(name, currentMode);
     });
 
@@ -620,7 +538,6 @@
     } else {
       beamChargeText.innerText = '必殺技：右クリック';
     }
-
   </script>
 </body>
 </html>
