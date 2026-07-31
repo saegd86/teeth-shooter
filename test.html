@@ -68,6 +68,21 @@
     #top-ranking-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100000; padding: 12px; box-sizing: border-box; }
     #top-ranking-box { background: rgba(255,255,255,0.95); color: #1b1b1b; border-radius: 16px; padding: 20px 16px; width: min(560px, 94vw); text-align: center; box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
     #close-ranking-btn { margin-top: 15px; width: 180px; padding: 12px 0; background: #ddd; color: #333; }
+    /* TOP画面のアップデートメモ用 */
+    #update-memo {
+      margin-top: 18px;
+      font-size: 11px;
+      color: #444;
+      text-align: left;
+      background: rgba(0, 0, 0, 0.04);
+      padding: 10px 12px;
+      border-radius: 8px;
+      line-height: 1.5;
+      font-weight: 800;
+    }
+    #update-memo span {
+      color: #d00000; /* 赤文字強調用 */
+    }
   </style>
 </head>
 
@@ -96,6 +111,15 @@
           <button id="view-rank-30-btn" class="btn view-ranking-btn" type="button">30秒ランキング</button>
         </div>
       </div>
+      
+      <!-- 👇ここから追加👇 -->
+      <div id="update-memo">
+        【アップデート情報】<br>
+        ・60秒モードに<span>レア敵（金の歯）</span>が稀に出現！<br>
+        ・60秒モードの後半、<span>スコアインフレボーナス</span>実装！
+      </div>
+      <!-- 👆ここまで追加👆 -->
+
     </div>
   </div>
 
